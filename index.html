@@ -61,7 +61,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
         }
 
-        /* Priority Colors */
         .priority-1 { border-right-color: #ef4444 !important; }
         .priority-2 { border-right-color: #f97316 !important; }
         .priority-3 { border-right-color: #3b82f6 !important; }
@@ -89,6 +88,7 @@
         #main-content-scroll {
             height: calc(100vh - 5rem);
             overflow-y: auto;
+            padding-bottom: 5rem;
         }
 
         select { cursor: pointer; }
@@ -240,7 +240,7 @@
                 </div>
             </div>
             
-            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl z-20 transition-transform active:scale-95">
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl z-20 active:scale-95 transition-transform">
                 <i class="fa-solid fa-plus"></i>
             </button>
         </main>
@@ -250,7 +250,7 @@
     <div id="task-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
-            <div class="relative bg-white dark:bg-dark-card rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden text-right border border-gray-100 dark:border-gray-700">
+            <div class="relative bg-white dark:bg-dark-card rounded-2xl w-full max-lg shadow-2xl overflow-hidden text-right border border-gray-100 dark:border-gray-700">
                 <div class="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <h3 class="text-lg font-bold dark:text-white heading" id="modal-title">משימה חדשה</h3>
                     <button onclick="app.closeTaskModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
@@ -288,13 +288,28 @@
         </div>
     </div>
 
-    <!-- Firebase Unified Module Script -->
+    <!-- Firebase SDK Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global State
+        // Firebase Configuration (Real Data from Project task-manager-109e0)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnTW2iN51IrUxinwojc4BGEzn5gQSDKBI",
+            authDomain: "task-manager-109e0.firebaseapp.com",
+            projectId: "task-manager-109e0",
+            storageBucket: "task-manager-109e0.firebasestorage.app",
+            messagingSenderId: "489374964203",
+            appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae",
+            measurementId: "G-YYTQ1EZ0WL"
+        };
+
+        const fApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fApp);
+        const auth = getAuth(fApp);
+        const artifactId = 'task-manager-109e0'; 
+
         const appState = {
             profile: null,
             tasks: [],
@@ -305,30 +320,11 @@
             listeners: []
         };
 
-        let db, auth;
-        const artifactId = typeof __app_id !== 'undefined' ? __app_id : 'task-manager-109e0';
-
         const app = {
             async loginAs(profile) {
                 appState.profile = profile;
-                
-                // Initialize Firebase inside the function using environment config
-                const firebaseConfig = {
-  apiKey: "AIzaSyBnTW2iN51IrUxinwojc4BGEzn5gQSDKBI",
-  authDomain: "task-manager-109e0.firebaseapp.com",
-  projectId: "task-manager-109e0",
-  storageBucket: "task-manager-109e0.firebasestorage.app",
-  messagingSenderId: "489374964203",
-  appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae",
-  measurementId: "G-YYTQ1EZ0WL"
-                    };
-
                 try {
-                    const fApp = initializeApp(firebaseConfig);
-                    db = getFirestore(fApp);
-                    auth = getAuth(fApp);
-
-                    // Rule 3: Auth FIRST
+                    // Sign in ANONYMOUSLY if no token provided
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
@@ -342,7 +338,7 @@
                     this.startSync();
                 } catch (e) {
                     console.error("Auth Error:", e);
-                    Swal.fire('שגיאת התחברות', 'וודא שהגדרות ה-Firebase תקינות בקוד', 'error');
+                    Swal.fire('שגיאת התחברות', 'וודא שהגדרת את ה-apiKey ושחוקי ה-Firestore מאושרים.', 'error');
                 }
             },
 
@@ -350,11 +346,11 @@
                 const avatar = document.getElementById('user-avatar');
                 const nameLabel = document.getElementById('user-display-name');
                 if (profile === 'user') {
-                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-blue-500";
+                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-blue-500 shadow-sm";
                     avatar.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
                     nameLabel.innerText = "אני";
                 } else {
-                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-pink-500";
+                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-pink-500 shadow-sm";
                     avatar.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
                     nameLabel.innerText = "אשתי";
                 }
@@ -364,14 +360,16 @@
                 if (!auth.currentUser) return;
                 appState.listeners.forEach(unsub => unsub());
 
-                // Rule 1: User-specific paths
                 const catPath = collection(db, 'artifacts', artifactId, 'users', appState.profile, 'categories');
                 const unsubCats = onSnapshot(catPath, (snap) => {
                     appState.categories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     if (appState.categories.length === 0) this.seedInitialCategories();
                     this.renderSidebarCategories();
                     this.renderTasks();
-                }, err => console.error("Category Sync Error:", err));
+                }, err => {
+                    console.error("Rules Error:", err);
+                    if(err.code === 'permission-denied') Swal.fire('חסימת הרשאה', 'בדוק את ה-Rules ב-Firebase Console.', 'error');
+                });
 
                 const taskPath = collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks');
                 const unsubTasks = onSnapshot(taskPath, (snap) => {
@@ -379,7 +377,7 @@
                     this.renderStats();
                     this.renderTasks();
                     this.flashSync();
-                }, err => console.error("Task Sync Error:", err));
+                });
 
                 appState.listeners = [unsubCats, unsubTasks];
             },
@@ -396,17 +394,12 @@
 
             async toggleComplete(id, currentStatus) {
                 if (!auth.currentUser) return;
-                try {
-                    const ref = doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id);
-                    await updateDoc(ref, { completed: !currentStatus });
-                } catch (e) {
-                    console.error("Toggle error:", e);
-                }
+                const ref = doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id);
+                await updateDoc(ref, { completed: !currentStatus });
             },
 
             async saveTask(e) {
                 e.preventDefault();
-                if (!auth.currentUser) return;
                 const id = document.getElementById('task-id').value;
                 const data = {
                     title: document.getElementById('task-title').value.trim(),
@@ -417,84 +410,20 @@
                     updatedAt: Date.now()
                 };
 
-                try {
-                    if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id), data);
-                    else await addDoc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'), { ...data, completed: false, createdAt: Date.now() });
-                    this.closeTaskModal();
-                } catch (err) {
-                    console.error("Save error:", err);
-                    Swal.fire('שגיאה בשמירה', err.message, 'error');
-                }
+                if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id), data);
+                else await addDoc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'), { ...data, completed: false, createdAt: Date.now() });
+                
+                this.closeTaskModal();
             },
 
             async deleteTask(id) {
-                if (!auth.currentUser) return;
-                const res = await Swal.fire({ title: 'למחוק משימה?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' });
+                const res = await Swal.fire({ title: 'למחוק משימה?', icon: 'warning', showCancelButton: true });
                 if (res.isConfirmed) await deleteDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id));
-            },
-
-            async saveCategory() {
-                if (!auth.currentUser) return;
-                const id = document.getElementById('edit-cat-id').value;
-                const name = document.getElementById('cat-name-input').value.trim();
-                if (!name) return;
-                const data = { name, color: appState.selectedColor };
-                if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id), data);
-                else await addDoc(collection(db, 'artifacts', appIdPrefix, 'users', appState.profile, 'categories'), data);
-                this.closeCategoryModal();
-            },
-
-            async deleteCategory() {
-                if (!auth.currentUser) return;
-                const id = document.getElementById('edit-cat-id').value;
-                const tasksInCat = appState.tasks.filter(t => t.categoryId === id).length;
-                const res = await Swal.fire({ title: 'מחיקה?', text: `קיימות ${tasksInCat} משימות שיימחקו!`, icon: 'warning', showCancelButton: true });
-                if (res.isConfirmed) {
-                    const batch = writeBatch(db);
-                    batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id));
-                    appState.tasks.filter(t => t.categoryId === id).forEach(t => batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', t.id)));
-                    await batch.commit();
-                    this.closeCategoryModal();
-                }
-            },
-
-            // JSON Management
-            async performImport(data, shouldClear) {
-                if (!auth.currentUser) return;
-                Swal.fire({ title: 'מעבד נתונים...', didOpen: () => Swal.showLoading() });
-                try {
-                    const batch = writeBatch(db);
-                    if (shouldClear) {
-                        const tasksSnap = await getDocs(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
-                        tasksSnap.forEach(d => batch.delete(d.ref));
-                    }
-                    for (const task of data.tasks) {
-                        const ref = doc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
-                        const t = {...task}; delete t.id;
-                        batch.set(ref, t);
-                    }
-                    await batch.commit();
-                    Swal.fire('הושלם!', 'הנתונים נטענו בהצלחה', 'success');
-                } catch (e) { console.error(e); Swal.fire('שגיאה', 'ייבוא נכשל', 'error'); }
-            },
-
-            exportTasks() {
-                const data = JSON.stringify({ tasks: appState.tasks, categories: appState.categories }, null, 2);
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; 
-                a.download = `taskmaster_${appState.profile}_backup_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
             },
 
             renderTasks(searchTerm = document.getElementById('search-input')?.value || '') {
                 const container = document.getElementById('tasks-container');
                 container.innerHTML = '';
-                
                 let filtered = appState.tasks.filter(t => {
                     let match = true;
                     if (appState.filter === 'active') match = !t.completed;
@@ -502,25 +431,18 @@
                     else if (appState.filter !== 'all') match = t.categoryId === appState.filter;
                     return match && t.title.toLowerCase().includes(searchTerm.toLowerCase());
                 });
-
-                if (filtered.length === 0) {
-                    document.getElementById('empty-state').classList.remove('hidden');
-                    return;
-                }
+                if (filtered.length === 0) { document.getElementById('empty-state').classList.remove('hidden'); return; }
                 document.getElementById('empty-state').classList.add('hidden');
-
                 const wrapper = document.createElement('div');
                 wrapper.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-                
                 filtered.forEach(task => {
                     const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'ללא', color: '#999' };
                     const card = document.createElement('div');
                     card.className = `task-card bg-white dark:bg-dark-card rounded-2xl p-5 border border-gray-100 dark:border-gray-700 relative animate-slide-up priority-${task.priority}`;
                     if (task.completed) card.classList.add('opacity-60');
-
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-3">
-                            <div class="check-box w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'hover:border-primary-500'}">
+                            <div class="check-box w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white shadow-glow' : 'hover:border-primary-500'}">
                                 ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                             </div>
                             <div class="flex gap-2">
@@ -529,21 +451,19 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span>
+                            <span class="w-2 h-2 rounded-full shadow-sm" style="background:${cat.color}"></span>
                             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tight">${cat.name}</span>
                         </div>
                         <h4 class="font-bold dark:text-white text-lg ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h4>
                         <p class="text-xs text-gray-500 line-clamp-2 mt-2 leading-relaxed">${task.description || ''}</p>
                         <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center text-[10px] text-gray-400 font-bold">
-                            <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL') : 'ללא תאריך'}</span>
+                            <span><i class="fa-regular fa-calendar ml-1"></i>${task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL') : 'ללא תאריך'}</span>
                             <span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 uppercase">${task.priority == 1 ? 'דחוף' : task.priority == 2 ? 'גבוה' : 'רגיל'}</span>
-                        </div>
-                    `;
+                        </div>`;
                     
                     card.querySelector('.check-box').onclick = () => this.toggleComplete(task.id, task.completed);
                     card.querySelector('.btn-edit').onclick = () => this.openTaskModal(task.id);
                     card.querySelector('.btn-delete').onclick = () => this.deleteTask(task.id);
-                    
                     wrapper.appendChild(card);
                 });
                 container.appendChild(wrapper);
@@ -574,6 +494,54 @@
                 });
             },
 
+            async exportTasks() {
+                const data = JSON.stringify({ tasks: appState.tasks, categories: appState.categories }, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = `taskmaster_${appState.profile}_backup.json`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            },
+
+            async performImport(data, shouldClear) {
+                Swal.fire({ title: 'מעבד...', didOpen: () => Swal.showLoading() });
+                try {
+                    const batch = writeBatch(db);
+                    if (shouldClear) {
+                        const tasksSnap = await getDocs(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
+                        tasksSnap.forEach(d => batch.delete(d.ref));
+                    }
+                    for (const task of data.tasks) {
+                        const ref = doc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
+                        const t = {...task}; delete t.id; batch.set(ref, t);
+                    }
+                    await batch.commit();
+                    Swal.fire('הושלם!', '', 'success');
+                } catch (e) { Swal.fire('שגיאה', '', 'error'); }
+            },
+
+            async saveCategory() {
+                const id = document.getElementById('edit-cat-id').value;
+                const name = document.getElementById('cat-name-input').value.trim();
+                if (!name) return;
+                const data = { name, color: appState.selectedColor };
+                if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id), data);
+                else await addDoc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'categories'), data);
+                this.closeCategoryModal();
+            },
+
+            async deleteCategory() {
+                const id = document.getElementById('edit-cat-id').value;
+                const res = await Swal.fire({ title: 'מחיקה?', text: 'כל המשימות בקטגוריה יימחקו!', icon: 'warning', showCancelButton: true });
+                if (res.isConfirmed) {
+                    const batch = writeBatch(db);
+                    batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id));
+                    appState.tasks.filter(t => t.categoryId === id).forEach(t => batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', t.id)));
+                    await batch.commit();
+                    this.closeCategoryModal();
+                }
+            },
+
+            // HELPERS
             openTaskModal(tid = null) {
                 document.getElementById('task-modal').classList.remove('hidden');
                 if (tid) {
@@ -592,7 +560,6 @@
                 }
             },
             closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
-            
             openCategoryModal(cid = null) {
                 document.getElementById('category-modal').classList.remove('hidden');
                 if (cid) {
@@ -610,50 +577,27 @@
                 this.renderPalette();
             },
             closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
-
-            setFilter(f) { 
-                appState.filter = f; 
-                this.renderTasks(); 
-                this.renderSidebarCategories(); 
-                if (window.innerWidth < 768) this.toggleSidebar();
-            },
-
-            toggleTheme() { 
-                document.documentElement.classList.toggle('dark'); 
-                localStorage.setItem('tm_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); 
-            },
-
-            toggleSidebar() { 
-                document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
-                document.getElementById('mobile-overlay').classList.toggle('hidden');
-            },
-
+            setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); if (window.innerWidth < 768) this.toggleSidebar(); },
+            toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.setItem('tm_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); },
+            toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('mobile-overlay').classList.toggle('hidden'); },
             renderStats() {
-                const t = appState.tasks.length; 
-                const d = appState.tasks.filter(x => x.completed).length;
-                document.getElementById('stat-total').innerText = t; 
-                document.getElementById('stat-active').innerText = t - d; 
-                document.getElementById('stat-completed').innerText = d;
+                const t = appState.tasks.length; const d = appState.tasks.filter(x => x.completed).length;
+                document.getElementById('stat-total').innerText = t; document.getElementById('stat-active').innerText = t - d; document.getElementById('stat-completed').innerText = d;
             },
-
             flashSync() {
                 const ind = document.getElementById('sync-indicator');
-                if (ind) {
-                    ind.classList.remove('hidden');
-                    setTimeout(() => ind.classList.add('hidden'), 1500);
-                }
+                if (ind) { ind.classList.remove('hidden'); setTimeout(() => ind.classList.add('hidden'), 1500); }
             },
             logout() { location.reload(); }
         };
 
-        // EXPOSE TO GLOBAL WINDOW
+        // EXPOSE GLOBALLY
         window.app = app;
 
         // Init Setup
-        if (localStorage.getItem('tm_theme') === 'dark') document.documentElement.classList.add('dark');
         app.renderPalette();
+        if (localStorage.getItem('tm_theme') === 'dark') document.documentElement.classList.add('dark');
 
-        // Handle File Loading
         document.getElementById('json-file-input').onchange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -661,14 +605,7 @@
             reader.onload = async (e) => {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    const res = await Swal.fire({
-                        title: 'טעינת גיבוי',
-                        text: `נמצאו ${imported.tasks.length} משימות. למזג או להחליף?`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'החלף הכל',
-                        cancelButtonText: 'הוסף לקיים'
-                    });
+                    const res = await Swal.fire({ title: 'טעינת גיבוי', text: `נמצאו ${imported.tasks.length} משימות. למזג או להחליף?`, icon: 'question', showCancelButton: true, confirmButtonText: 'החלף הכל', cancelButtonText: 'הוסף לקיים' });
                     if (res.isConfirmed) await app.performImport(imported, true);
                     else if (res.dismiss === Swal.DismissReason.cancel) await app.performImport(imported, false);
                 } catch (err) { Swal.fire('שגיאה', 'קובץ לא תקין', 'error'); }
