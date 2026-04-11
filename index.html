@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskMaster Pro - Shared Edition</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -97,7 +93,6 @@
 
     <input type="file" id="json-file-input" accept=".json">
 
-    <!-- Auth Overlay -->
     <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
         <div class="max-w-2xl w-full text-center">
             <div class="mb-12 animate-slide-up">
@@ -128,7 +123,6 @@
         </div>
     </div>
 
-    <!-- Main App UI -->
     <div id="main-app" class="app-container hidden">
         <aside id="sidebar" class="bg-white dark:bg-dark-card w-72 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 flex flex-col fixed md:relative z-30 h-full shadow-2xl md:shadow-none transition-all -translate-x-full md:translate-x-0">
             <div class="h-20 flex-shrink-0 flex items-center px-8 border-b border-gray-100 dark:border-gray-700">
@@ -190,10 +184,8 @@
             </div>
         </aside>
 
-        <!-- Mobile Overlay -->
         <div id="mobile-overlay" class="fixed inset-0 bg-dark-bg/80 backdrop-blur-sm z-20 hidden md:hidden transition-opacity" onclick="app.toggleSidebar()"></div>
 
-        <!-- Content Area -->
         <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
             <header class="h-20 flex-shrink-0 glass z-10 flex items-center justify-between px-6 sticky top-0">
                 <div class="flex items-center gap-4">
@@ -237,7 +229,6 @@
         </main>
     </div>
 
-    <!-- Modals -->
     <div id="task-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -315,11 +306,15 @@
             async loginAs(profile) {
                 appState.profile = profile;
                 try {
+                    console.log("מתחיל התחברות עבור פרופיל:", profile);
+                    let userCredential;
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
+                        userCredential = await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
-                        await signInAnonymously(auth);
+                        userCredential = await signInAnonymously(auth);
                     }
+                    
+                    console.log("התחברות הצליחה! UID:", userCredential.user.uid);
                     
                     document.getElementById('auth-overlay').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
@@ -327,8 +322,8 @@
                     this.updateProfileUI(profile);
                     this.startSync();
                 } catch (e) {
-                    console.error("Auth Error:", e);
-                    Swal.fire('שגיאה', 'וודא שחוקי ה-Firestore ב-Firebase Console מאושרים.', 'error');
+                    console.error("Firebase Auth Error:", e);
+                    Swal.fire('שגיאת התחברות', `ודא ש-Anonymous Auth מופעל ב-Firebase ושדומיין ה-GitHub מאושר. <br><small>${e.message}</small>`, 'error');
                 }
             },
 
