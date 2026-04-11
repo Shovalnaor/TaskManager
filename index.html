@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro - Shared Edition</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* Global Reset & Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            font-family: 'Rubik', 'Assistant', sans-serif;
+        }
+
+        .heading { font-family: 'Prata', serif; }
+        
+        .glass { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
+        }
+        .dark .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+
+        /* Layout Container */
+        .app-container { 
+            height: 100vh; 
+            display: flex; 
+            width: 100%; 
+            overflow: hidden; 
+        }
+
+        .task-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-right: 4px solid transparent; 
+        }
+        .task-card:hover { 
+            transform: translateY(-4px) scale(1.01); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+        }
+
+        /* Priority Colors */
+        .priority-1 { border-right-color: #ef4444 !important; }
+        .priority-2 { border-right-color: #f97316 !important; }
+        .priority-3 { border-right-color: #3b82f6 !important; }
+
+        .active-nav { 
+            background-color: #eef2ff; 
+            color: #4f46e5; 
+        }
+        .dark .active-nav { 
+            background-color: rgba(99, 102, 241, 0.2); 
+            color: #818cf8; 
+        }
+
+        #auth-overlay { 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); 
+        }
+        
+        .profile-card { transition: all 0.3s ease; cursor: pointer; }
+        .profile-card:hover { transform: translateY(-10px); box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        
+        input[type="file"] { display: none; }
+        
+        /* Fixed Scroll Area */
+        #main-content-scroll {
+            height: calc(100vh - 5rem);
+            overflow-y: auto;
+        }
+
+        select { cursor: pointer; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-dark-bg text-gray-800 transition-colors duration-300">
+
+    <input type="file" id="json-file-input" accept=".json">
+
+    <!-- Auth / Profile Selection Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div class="max-w-2xl w-full text-center">
+            <div class="mb-12 animate-slide-up">
+                <div class="w-20 h-20 bg-primary-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-glow mx-auto mb-6">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-white heading mb-2">ברוכים הבאים ל-TaskMaster</h1>
+                <p class="text-gray-400">אנא בחרו פרופיל כדי להתחיל בסנכרון המשימות</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-xl mx-auto">
+                <div onclick="app.loginAs('user')" class="profile-card bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-700">
+                    <div class="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <h3 class="text-xl font-bold dark:text-white mb-1">פרופיל אישי</h3>
+                    <p class="text-sm text-gray-500">המשימות שלי</p>
+                </div>
+                
+                <div onclick="app.loginAs('wife')" class="profile-card bg-white dark:bg-dark-card p-8 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-700">
+                    <div class="w-24 h-24 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <h3 class="text-xl font-bold dark:text-white mb-1">פרופיל אשתי</h3>
+                    <p class="text-sm text-gray-500">המשימות שלה</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application UI -->
+    <div id="main-app" class="app-container hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-white dark:bg-dark-card w-72 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 flex flex-col fixed md:relative z-30 h-full shadow-2xl md:shadow-none transition-all -translate-x-full md:translate-x-0">
+            <div class="h-20 flex-shrink-0 flex items-center px-8 border-b border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-3 text-primary-600 font-extrabold text-2xl">
+                    <i class="fa-solid fa-layer-group text-primary-500"></i>
+                    <span class="heading">TaskMaster</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar">
+                <div class="mb-6 px-4 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">מחובר כעת:</p>
+                    <div class="flex items-center gap-3">
+                        <div id="user-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"></div>
+                        <span id="user-display-name" class="font-bold text-sm dark:text-white"></span>
+                    </div>
+                </div>
+
+                <button onclick="app.setFilter('all')" id="nav-all" class="nav-item active-nav w-full flex items-center gap-4 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                    <i class="fa-solid fa-border-all w-5 text-center"></i> כל המשימות
+                </button>
+                <button onclick="app.setFilter('active')" id="nav-active" class="nav-item w-full flex items-center gap-4 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                    <i class="fa-regular fa-clock w-5 text-center"></i> בתהליך
+                </button>
+                <button onclick="app.setFilter('completed')" id="nav-completed" class="nav-item w-full flex items-center gap-4 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                    <i class="fa-regular fa-circle-check w-5 text-center"></i> הושלמו
+                </button>
+
+                <div class="pt-6">
+                    <div class="flex items-center justify-between px-4 mb-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase">קטגוריות</p>
+                        <button onclick="app.openCategoryModal()" class="text-gray-400 hover:text-primary-500 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </div>
+                    <div id="sidebar-categories" class="space-y-1"></div>
+                </div>
+
+                <div class="pt-6">
+                    <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">ניהול נתונים</p>
+                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all rounded-xl">
+                        <i class="fa-solid fa-cloud-arrow-down w-5"></i> ייצוא גיבוי JSON
+                    </button>
+                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all rounded-xl">
+                        <i class="fa-solid fa-cloud-arrow-up w-5"></i> טעינת גיבוי JSON
+                    </button>
+                </div>
+            </nav>
+
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                <button onclick="app.logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 hover:text-red-500 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i> החלף פרופיל
+                </button>
+                <button onclick="app.toggleTheme()" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm font-medium dark:text-gray-200">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-sun dark:hidden text-yellow-500"></i>
+                        <i class="fa-solid fa-moon hidden dark:inline text-blue-400"></i>
+                        <span class="dark:hidden">מצב יום</span><span class="hidden dark:inline">מצב לילה</span>
+                    </div>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-dark-bg/80 backdrop-blur-sm z-20 hidden md:hidden transition-opacity" onclick="app.toggleSidebar()"></div>
+
+        <!-- Main Content View -->
+        <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
+            <header class="h-20 flex-shrink-0 glass z-10 flex items-center justify-between px-6 sticky top-0">
+                <div class="flex items-center gap-4">
+                    <button onclick="app.toggleSidebar()" class="md:hidden p-2 text-gray-500"><i class="fa-solid fa-bars-staggered text-xl"></i></button>
+                    <h1 id="page-title" class="text-xl font-bold text-gray-800 dark:text-white heading">לוח עבודה</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="sync-indicator" class="hidden text-[10px] font-bold text-green-500 flex items-center gap-1">
+                        <i class="fa-solid fa-rotate animate-spin"></i> מסנכרן...
+                    </div>
+                    <div class="relative group hidden lg:block">
+                        <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-500 transition-colors"></i>
+                        <input type="text" id="search-input" oninput="app.renderTasks(this.value)" placeholder="חיפוש משימה..." class="w-64 pr-10 pl-4 py-2 bg-gray-100/50 dark:bg-gray-800/50 border border-transparent focus:bg-white rounded-xl text-sm outline-none dark:text-white">
+                    </div>
+                    <button onclick="app.openTaskModal()" class="bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg items-center gap-2 flex hover:scale-105 transition-all">
+                        <i class="fa-solid fa-plus"></i> משימה חדשה
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div id="main-content-scroll" class="px-4 sm:px-8 py-6 pb-24 custom-scrollbar">
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white dark:bg-dark-card p-5 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+                        <div><p class="text-gray-400 text-[10px] font-bold uppercase mb-1">סה"כ</p><h3 class="text-2xl font-bold dark:text-white" id="stat-total">0</h3></div>
+                        <i class="fa-solid fa-layer-group text-blue-500 text-xl"></i>
+                    </div>
+                    <div class="bg-white dark:bg-dark-card p-5 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+                        <div><p class="text-gray-400 text-[10px] font-bold uppercase mb-1">פעיל</p><h3 class="text-2xl font-bold dark:text-white" id="stat-active">0</h3></div>
+                        <i class="fa-solid fa-bolt text-orange-500 text-xl"></i>
+                    </div>
+                    <div class="bg-white dark:bg-dark-card p-5 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+                        <div><p class="text-gray-400 text-[10px] font-bold uppercase mb-1">הושלם</p><h3 class="text-2xl font-bold dark:text-white" id="stat-completed">0</h3></div>
+                        <i class="fa-solid fa-check text-green-500 text-xl"></i>
+                    </div>
+                </div>
+
+                <div id="tasks-container"></div>
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 opacity-50 text-center">
+                    <i class="fa-solid fa-rocket text-5xl mb-4 text-gray-400"></i>
+                    <p class="heading text-xl text-gray-400">אין משימות כרגע</p>
+                </div>
+            </div>
+            
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center text-xl z-20 transition-transform active:scale-95">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="task-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="relative bg-white dark:bg-dark-card rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden text-right border border-gray-100 dark:border-gray-700">
+                <div class="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <h3 class="text-lg font-bold dark:text-white heading" id="modal-title">משימה חדשה</h3>
+                    <button onclick="app.closeTaskModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4">
+                    <input type="hidden" id="task-id">
+                    <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">כותרת</label><input type="text" id="task-title" required class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none focus:ring-2 focus:ring-primary-500"></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">תיאור</label><textarea id="task-desc" rows="2" class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none resize-none"></textarea></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">קטגוריה</label><select id="task-category" class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none"></select></div>
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">דחיפות</label><select id="task-priority" class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none"><option value="3">🔵 רגילה</option><option value="2">🟠 גבוהה</option><option value="1">🔴 דחופה</option></select></div>
+                    </div>
+                    <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">תאריך יעד</label><input type="date" id="task-date" class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none"></div>
+                    <button type="submit" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold mt-4 shadow-lg hover:bg-primary-700 transition-all">שמור שינויים</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="category-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-dark-card rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-gray-700 p-6 text-right">
+                <h3 id="cat-modal-title" class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
+                <input type="hidden" id="edit-cat-id">
+                <div class="space-y-4">
+                    <div><label class="text-[10px] font-bold text-gray-400 mb-1 block">שם הקטגוריה</label><input type="text" id="cat-name-input" class="w-full rounded-xl border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 dark:text-white py-2.5 px-4 outline-none focus:ring-2 focus:ring-primary-500"></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 mb-2 block">צבע</label><div id="color-palette" class="grid grid-cols-5 gap-3"></div></div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <button onclick="app.saveCategory()" class="w-full bg-primary-600 text-white py-3 rounded-xl font-bold shadow-md">שמור</button>
+                        <button onclick="app.deleteCategory()" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm hover:bg-red-50 rounded-lg transition-all">מחק קטגוריה</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Unified Module Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global State
+        const appState = {
+            profile: null,
+            tasks: [],
+            categories: [],
+            filter: 'all',
+            palette: ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#10b981', '#06b6d4', '#3b82f6', '#64748b'],
+            selectedColor: '#6366f1',
+            listeners: []
+        };
+
+        let db, auth;
+        const artifactId = typeof __app_id !== 'undefined' ? __app_id : 'task-manager-109e0';
+
+        const app = {
+            async loginAs(profile) {
+                appState.profile = profile;
+                
+                // Initialize Firebase inside the function using environment config
+                const firebaseConfig = typeof __firebase_config !== 'undefined' 
+                    ? JSON.parse(__firebase_config) 
+                    : { 
+                        apiKey: "AIzaSyBnTW2iN51IrUxinwojc4BGEzn5gQSDKBI", // Ensure this is provided or handled by environment
+                        authDomain: "task-manager-109e0.firebaseapp.com",
+                        projectId: "task-manager-109e0",
+                        storageBucket: "task-manager-109e0.firebasestorage.app",
+                        messagingSenderId: "489374964203",
+                        appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae"
+                    };
+
+                try {
+                    const fApp = initializeApp(firebaseConfig);
+                    db = getFirestore(fApp);
+                    auth = getAuth(fApp);
+
+                    // Rule 3: Auth FIRST
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    
+                    document.getElementById('auth-overlay').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    
+                    this.updateProfileUI(profile);
+                    this.startSync();
+                } catch (e) {
+                    console.error("Auth Error:", e);
+                    Swal.fire('שגיאת התחברות', 'וודא שהגדרות ה-Firebase תקינות בקוד', 'error');
+                }
+            },
+
+            updateProfileUI(profile) {
+                const avatar = document.getElementById('user-avatar');
+                const nameLabel = document.getElementById('user-display-name');
+                if (profile === 'user') {
+                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-blue-500";
+                    avatar.innerHTML = '<i class="fa-solid fa-user-tie"></i>';
+                    nameLabel.innerText = "אני";
+                } else {
+                    avatar.className = "w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-pink-500";
+                    avatar.innerHTML = '<i class="fa-solid fa-user-astronaut"></i>';
+                    nameLabel.innerText = "אשתי";
+                }
+            },
+
+            startSync() {
+                if (!auth.currentUser) return;
+                appState.listeners.forEach(unsub => unsub());
+
+                // Rule 1: User-specific paths
+                const catPath = collection(db, 'artifacts', artifactId, 'users', appState.profile, 'categories');
+                const unsubCats = onSnapshot(catPath, (snap) => {
+                    appState.categories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    if (appState.categories.length === 0) this.seedInitialCategories();
+                    this.renderSidebarCategories();
+                    this.renderTasks();
+                }, err => console.error("Category Sync Error:", err));
+
+                const taskPath = collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks');
+                const unsubTasks = onSnapshot(taskPath, (snap) => {
+                    appState.tasks = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderStats();
+                    this.renderTasks();
+                    this.flashSync();
+                }, err => console.error("Task Sync Error:", err));
+
+                appState.listeners = [unsubCats, unsubTasks];
+            },
+
+            async seedInitialCategories() {
+                const batch = writeBatch(db);
+                const initial = [{ name: 'עבודה', color: '#6366f1' }, { name: 'אישי', color: '#10b981' }, { name: 'דחוף', color: '#ef4444' }];
+                initial.forEach(c => {
+                    const ref = doc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'categories'));
+                    batch.set(ref, c);
+                });
+                await batch.commit();
+            },
+
+            async toggleComplete(id, currentStatus) {
+                if (!auth.currentUser) return;
+                try {
+                    const ref = doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id);
+                    await updateDoc(ref, { completed: !currentStatus });
+                } catch (e) {
+                    console.error("Toggle error:", e);
+                }
+            },
+
+            async saveTask(e) {
+                e.preventDefault();
+                if (!auth.currentUser) return;
+                const id = document.getElementById('task-id').value;
+                const data = {
+                    title: document.getElementById('task-title').value.trim(),
+                    description: document.getElementById('task-desc').value.trim(),
+                    categoryId: document.getElementById('task-category').value,
+                    priority: parseInt(document.getElementById('task-priority').value),
+                    dueDate: document.getElementById('task-date').value,
+                    updatedAt: Date.now()
+                };
+
+                try {
+                    if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id), data);
+                    else await addDoc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'), { ...data, completed: false, createdAt: Date.now() });
+                    this.closeTaskModal();
+                } catch (err) {
+                    console.error("Save error:", err);
+                    Swal.fire('שגיאה בשמירה', err.message, 'error');
+                }
+            },
+
+            async deleteTask(id) {
+                if (!auth.currentUser) return;
+                const res = await Swal.fire({ title: 'למחוק משימה?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' });
+                if (res.isConfirmed) await deleteDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', id));
+            },
+
+            async saveCategory() {
+                if (!auth.currentUser) return;
+                const id = document.getElementById('edit-cat-id').value;
+                const name = document.getElementById('cat-name-input').value.trim();
+                if (!name) return;
+                const data = { name, color: appState.selectedColor };
+                if (id) await updateDoc(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id), data);
+                else await addDoc(collection(db, 'artifacts', appIdPrefix, 'users', appState.profile, 'categories'), data);
+                this.closeCategoryModal();
+            },
+
+            async deleteCategory() {
+                if (!auth.currentUser) return;
+                const id = document.getElementById('edit-cat-id').value;
+                const tasksInCat = appState.tasks.filter(t => t.categoryId === id).length;
+                const res = await Swal.fire({ title: 'מחיקה?', text: `קיימות ${tasksInCat} משימות שיימחקו!`, icon: 'warning', showCancelButton: true });
+                if (res.isConfirmed) {
+                    const batch = writeBatch(db);
+                    batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'categories', id));
+                    appState.tasks.filter(t => t.categoryId === id).forEach(t => batch.delete(doc(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks', t.id)));
+                    await batch.commit();
+                    this.closeCategoryModal();
+                }
+            },
+
+            // JSON Management
+            async performImport(data, shouldClear) {
+                if (!auth.currentUser) return;
+                Swal.fire({ title: 'מעבד נתונים...', didOpen: () => Swal.showLoading() });
+                try {
+                    const batch = writeBatch(db);
+                    if (shouldClear) {
+                        const tasksSnap = await getDocs(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
+                        tasksSnap.forEach(d => batch.delete(d.ref));
+                    }
+                    for (const task of data.tasks) {
+                        const ref = doc(collection(db, 'artifacts', artifactId, 'users', appState.profile, 'tasks'));
+                        const t = {...task}; delete t.id;
+                        batch.set(ref, t);
+                    }
+                    await batch.commit();
+                    Swal.fire('הושלם!', 'הנתונים נטענו בהצלחה', 'success');
+                } catch (e) { console.error(e); Swal.fire('שגיאה', 'ייבוא נכשל', 'error'); }
+            },
+
+            exportTasks() {
+                const data = JSON.stringify({ tasks: appState.tasks, categories: appState.categories }, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; 
+                a.download = `taskmaster_${appState.profile}_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            },
+
+            renderTasks(searchTerm = document.getElementById('search-input')?.value || '') {
+                const container = document.getElementById('tasks-container');
+                container.innerHTML = '';
+                
+                let filtered = appState.tasks.filter(t => {
+                    let match = true;
+                    if (appState.filter === 'active') match = !t.completed;
+                    else if (appState.filter === 'completed') match = t.completed;
+                    else if (appState.filter !== 'all') match = t.categoryId === appState.filter;
+                    return match && t.title.toLowerCase().includes(searchTerm.toLowerCase());
+                });
+
+                if (filtered.length === 0) {
+                    document.getElementById('empty-state').classList.remove('hidden');
+                    return;
+                }
+                document.getElementById('empty-state').classList.add('hidden');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+                
+                filtered.forEach(task => {
+                    const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'ללא', color: '#999' };
+                    const card = document.createElement('div');
+                    card.className = `task-card bg-white dark:bg-dark-card rounded-2xl p-5 border border-gray-100 dark:border-gray-700 relative animate-slide-up priority-${task.priority}`;
+                    if (task.completed) card.classList.add('opacity-60');
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="check-box w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'hover:border-primary-500'}">
+                                ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn-edit text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                                <button class="btn-delete text-gray-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span>
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tight">${cat.name}</span>
+                        </div>
+                        <h4 class="font-bold dark:text-white text-lg ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 mt-2 leading-relaxed">${task.description || ''}</p>
+                        <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center text-[10px] text-gray-400 font-bold">
+                            <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL') : 'ללא תאריך'}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 uppercase">${task.priority == 1 ? 'דחוף' : task.priority == 2 ? 'גבוה' : 'רגיל'}</span>
+                        </div>
+                    `;
+                    
+                    card.querySelector('.check-box').onclick = () => this.toggleComplete(task.id, task.completed);
+                    card.querySelector('.btn-edit').onclick = () => this.openTaskModal(task.id);
+                    card.querySelector('.btn-delete').onclick = () => this.deleteTask(task.id);
+                    
+                    wrapper.appendChild(card);
+                });
+                container.appendChild(wrapper);
+            },
+
+            renderSidebarCategories() {
+                const container = document.getElementById('sidebar-categories');
+                container.innerHTML = '';
+                appState.categories.forEach(cat => {
+                    const btn = document.createElement('div');
+                    btn.className = `group flex items-center justify-between px-4 py-2 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`;
+                    btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); };
+                    btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full shadow-sm" style="background:${cat.color}"></span><span>${cat.name}</span></div>
+                    <i class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all edit-cat-btn hover:text-primary-500"></i>`;
+                    btn.querySelector('.edit-cat-btn').onclick = (e) => { e.stopPropagation(); this.openCategoryModal(cat.id); };
+                    container.appendChild(btn);
+                });
+                const sel = document.getElementById('task-category');
+                if (sel) sel.innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            },
+
+            renderPalette() {
+                const container = document.getElementById('color-palette');
+                if (!container) return;
+                container.innerHTML = appState.palette.map(c => `<div class="color-swatch w-8 h-8 rounded-full cursor-pointer border-2 ${appState.selectedColor === c ? 'border-primary-500 scale-110 shadow-lg' : 'border-transparent'}" style="background:${c}"></div>`).join('');
+                container.querySelectorAll('.color-swatch').forEach((el, i) => {
+                    el.onclick = () => { appState.selectedColor = appState.palette[i]; this.renderPalette(); };
+                });
+            },
+
+            openTaskModal(tid = null) {
+                document.getElementById('task-modal').classList.remove('hidden');
+                if (tid) {
+                    const t = appState.tasks.find(x => x.id === tid);
+                    document.getElementById('task-id').value = t.id;
+                    document.getElementById('task-title').value = t.title;
+                    document.getElementById('task-desc').value = t.description;
+                    document.getElementById('task-priority').value = t.priority;
+                    document.getElementById('task-category').value = t.categoryId;
+                    document.getElementById('task-date').value = t.dueDate;
+                    document.getElementById('modal-title').innerText = "עריכת משימה";
+                } else {
+                    document.getElementById('task-form').reset();
+                    document.getElementById('task-id').value = '';
+                    document.getElementById('modal-title').innerText = "משימה חדשה";
+                }
+            },
+            closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
+            
+            openCategoryModal(cid = null) {
+                document.getElementById('category-modal').classList.remove('hidden');
+                if (cid) {
+                    const c = appState.categories.find(x => x.id === cid);
+                    document.getElementById('edit-cat-id').value = c.id;
+                    document.getElementById('cat-name-input').value = c.name;
+                    appState.selectedColor = c.color;
+                    document.getElementById('btn-delete-cat').classList.remove('hidden');
+                } else {
+                    document.getElementById('edit-cat-id').value = '';
+                    document.getElementById('cat-name-input').value = '';
+                    document.getElementById('btn-delete-cat').classList.add('hidden');
+                    appState.selectedColor = appState.palette[0];
+                }
+                this.renderPalette();
+            },
+            closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
+
+            setFilter(f) { 
+                appState.filter = f; 
+                this.renderTasks(); 
+                this.renderSidebarCategories(); 
+                if (window.innerWidth < 768) this.toggleSidebar();
+            },
+
+            toggleTheme() { 
+                document.documentElement.classList.toggle('dark'); 
+                localStorage.setItem('tm_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); 
+            },
+
+            toggleSidebar() { 
+                document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
+                document.getElementById('mobile-overlay').classList.toggle('hidden');
+            },
+
+            renderStats() {
+                const t = appState.tasks.length; 
+                const d = appState.tasks.filter(x => x.completed).length;
+                document.getElementById('stat-total').innerText = t; 
+                document.getElementById('stat-active').innerText = t - d; 
+                document.getElementById('stat-completed').innerText = d;
+            },
+
+            flashSync() {
+                const ind = document.getElementById('sync-indicator');
+                if (ind) {
+                    ind.classList.remove('hidden');
+                    setTimeout(() => ind.classList.add('hidden'), 1500);
+                }
+            },
+            logout() { location.reload(); }
+        };
+
+        // EXPOSE TO GLOBAL WINDOW
+        window.app = app;
+
+        // Init Setup
+        if (localStorage.getItem('tm_theme') === 'dark') document.documentElement.classList.add('dark');
+        app.renderPalette();
+
+        // Handle File Loading
+        document.getElementById('json-file-input').onchange = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    const res = await Swal.fire({
+                        title: 'טעינת גיבוי',
+                        text: `נמצאו ${imported.tasks.length} משימות. למזג או להחליף?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'החלף הכל',
+                        cancelButtonText: 'הוסף לקיים'
+                    });
+                    if (res.isConfirmed) await app.performImport(imported, true);
+                    else if (res.dismiss === Swal.DismissReason.cancel) await app.performImport(imported, false);
+                } catch (err) { Swal.fire('שגיאה', 'קובץ לא תקין', 'error'); }
+            };
+            reader.readAsText(file);
+        };
+    </script>
+</body>
+</html>
