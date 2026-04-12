@@ -6,89 +6,68 @@
     <title>TaskMaster Pro - Shared Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-
+        
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden; 
-            font-family: 'Rubik', 'Assistant', sans-serif;
+            font-family: 'Rubik', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         .heading { font-family: 'Prata', serif; }
-        
-        .glass { 
-            background: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(12px); 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
-        }
-        .dark .glass { 
-            background: rgba(30, 41, 59, 0.7); 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass { background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* Sidebar Drawer Logic */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
         }
 
-        .task-card { 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            border-right: 4px solid transparent; 
-        }
-        .task-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-
+        .task-card { transition: all 0.3s ease; border-right: 4px solid transparent; }
         .priority-1 { border-right-color: #ef4444 !important; }
         .priority-2 { border-right-color: #f97316 !important; }
         .priority-3 { border-right-color: #3b82f6 !important; }
 
-        .active-nav { background-color: #eef2ff; color: #4f46e5; }
-        .dark .active-nav { background-color: rgba(99, 102, 241, 0.2); color: #818cf8; }
-
-        .profile-card { transition: all 0.3s ease; cursor: pointer; user-select: none; }
-        .profile-card:hover { transform: translateY(-10px); }
+        .active-nav { background-color: #4f46e5 !important; color: white !important; }
         
-        /* iOS Fix for input zoom */
         input, select, textarea { font-size: 16px !important; }
 
         #main-content-scroll {
             height: calc(100vh - 5rem);
             overflow-y: auto;
-            padding-bottom: 8rem; /* Extra space for bottom nav and FAB */
+            padding-bottom: 8rem;
         }
         .select-none { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
 
     <input type="file" id="json-file-input" accept=".json" class="hidden">
 
     <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/95 backdrop-blur-md">
-        <div class="max-w-2xl w-full text-center">
+        <div class="max-w-md w-full text-center">
             <div class="mb-12">
-                <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-glow mx-auto mb-6">
+                <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <h1 class="text-4xl font-bold text-white heading mb-2">ברוכים הבאים ל-TaskMaster</h1>
-                <p class="text-slate-400">אנא בחרו פרופיל כדי להתחיל בסנכרון המשימות</p>
+                <h1 class="text-3xl font-bold text-white heading mb-2">TaskMaster</h1>
+                <p class="text-slate-400">בחר פרופיל לסנכרון</p>
             </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-xl mx-auto">
-                <div onclick="app.loginAs('user')" class="profile-card bg-white p-8 rounded-[2rem] shadow-2xl">
-                    <div class="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"><i class="fa-solid fa-user-tie"></i></div>
-                    <h3 class="text-xl font-bold mb-1">פרופיל אישי</h3>
-                    <p class="text-sm text-gray-500">המשימות שלי</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div onclick="app.loginAs('user')" class="bg-white p-6 rounded-2xl shadow-xl cursor-pointer hover:scale-105 transition-all select-none">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-user-tie"></i></div>
+                    <h3 class="font-bold">אני</h3>
                 </div>
-                
-                <div onclick="app.loginAs('wife')" class="profile-card bg-white p-8 rounded-[2rem] shadow-2xl">
-                    <div class="w-24 h-24 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"><i class="fa-solid fa-user-astronaut"></i></div>
-                    <h3 class="text-xl font-bold mb-1">פרופיל אשתי</h3>
-                    <p class="text-sm text-gray-500">המשימות שלה</p>
+                <div onclick="app.loginAs('wife')" class="bg-white p-6 rounded-2xl shadow-xl cursor-pointer hover:scale-105 transition-all select-none">
+                    <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-user-astronaut"></i></div>
+                    <h3 class="font-bold">אשתי</h3>
                 </div>
             </div>
         </div>
@@ -96,126 +75,120 @@
 
     <div id="main-app" class="flex h-screen w-full overflow-hidden hidden">
         
-        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 hidden md:flex flex-col">
-            <div class="h-20 flex items-center px-8 border-b dark:border-slate-700">
-                <div class="flex items-center gap-3 text-indigo-600 font-extrabold text-2xl">
-                    <i class="fa-solid fa-layer-group"></i><span class="heading">TaskMaster</span>
-                </div>
+        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col">
+            <div class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-700">
+                <span class="text-2xl font-extrabold text-indigo-600 heading">TaskMaster</span>
+                <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
-            <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-                <div class="mb-6 px-4 py-3 bg-gray-50 dark:bg-slate-700 rounded-2xl border dark:border-slate-600">
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <div class="mb-6 px-4 py-3 bg-gray-50 dark:bg-slate-700 rounded-2xl">
                     <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">מחובר כעת:</p>
                     <div class="flex items-center gap-3">
-                        <div id="user-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"></div>
+                        <div id="user-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"></div>
                         <span id="user-display-name" class="font-bold text-sm dark:text-white"></span>
                     </div>
                 </div>
 
-                <button onclick="app.setFilter('all')" class="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium rounded-xl hover:bg-gray-100 transition-all nav-item" id="nav-all">
-                    <i class="fa-solid fa-border-all w-5"></i> כל המשימות
+                <button onclick="app.setFilter('all')" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-100 transition-all nav-item" id="nav-all">
+                    <i class="fa-solid fa-border-all"></i> כל המשימות
                 </button>
 
                 <div class="pt-6">
                     <div class="flex items-center justify-between px-4 mb-2">
                         <p class="text-xs font-bold text-gray-400 uppercase">קטגוריות</p>
-                        <button onclick="app.openCategoryModal()" class="text-gray-400 hover:text-indigo-500"><i class="fa-solid fa-plus text-xs"></i></button>
+                        <button onclick="app.openCategoryModal()" class="text-indigo-500"><i class="fa-solid fa-plus"></i></button>
                     </div>
                     <div id="sidebar-categories" class="space-y-1"></div>
                 </div>
 
                 <div class="pt-6 border-t dark:border-slate-700 mt-6">
-                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-4 px-4 py-2 text-xs text-slate-400 hover:text-indigo-500 transition-all">
-                        <i class="fa-solid fa-cloud-arrow-down w-5"></i> ייצוא גיבוי JSON
-                    </button>
-                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-4 px-4 py-2 text-xs text-slate-400 hover:text-indigo-500 transition-all">
-                        <i class="fa-solid fa-cloud-arrow-up w-5"></i> טעינת גיבוי JSON
-                    </button>
+                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2">ניהול נתונים</p>
+                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
+                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
                 </div>
             </nav>
-
-            <div class="p-4 border-t dark:border-slate-700">
-                <button onclick="app.logout()" class="w-full text-center py-3 text-sm text-red-500 font-bold select-none">החלף פרופיל</button>
-            </div>
+            <div class="p-4"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
-            <header class="h-20 flex-shrink-0 glass z-10 flex items-center justify-between px-6 sticky top-0">
-                <h1 id="page-title" class="text-xl font-bold dark:text-white heading">לוח עבודה</h1>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="app.toggleSidebar()"></div>
+
+        <main class="flex-1 flex flex-col relative overflow-hidden">
+            <header class="h-20 flex-shrink-0 glass flex items-center justify-between px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-4">
-                    <div id="sync-indicator" class="hidden text-[10px] font-bold text-green-500 flex items-center gap-1">
-                        <i class="fa-solid fa-rotate animate-spin"></i> מסנכרן...
-                    </div>
-                    <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg flex items-center gap-2 hover:scale-105 transition-all select-none">
-                        <i class="fa-solid fa-plus"></i> משימה חדשה
-                    </button>
+                    <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white"><i class="fa-solid fa-bars-staggered text-xl"></i></button>
+                    <h1 id="page-title" class="text-xl font-bold dark:text-white heading">לוח עבודה</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="sync-indicator" class="hidden text-green-500 text-[10px]"><i class="fa-solid fa-sync animate-spin"></i></div>
+                    <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg select-none">+ חדש</button>
                 </div>
             </header>
 
-            <div id="main-content-scroll" class="px-4 sm:px-8 py-6">
+            <div id="main-content-scroll" class="px-4 md:px-8 py-6">
                 <div class="grid grid-cols-3 gap-4 mb-8">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border dark:border-slate-700">
-                        <p class="text-gray-400 text-[10px] font-bold uppercase mb-1">סה"כ</p>
-                        <h3 class="text-2xl font-bold dark:text-white" id="stat-total">0</h3>
+                        <p class="text-gray-400 text-[10px] uppercase mb-1">סה"כ</p>
+                        <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border-b-4 border-orange-500">
-                        <p class="text-gray-400 text-[10px] font-bold uppercase mb-1">פעיל</p>
-                        <h3 class="text-2xl font-bold dark:text-white" id="stat-active">0</h3>
+                        <p class="text-gray-400 text-[10px] uppercase mb-1">פעיל</p>
+                        <h3 id="stat-active" class="text-2xl font-bold dark:text-white">0</h3>
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border-b-4 border-green-500">
-                        <p class="text-gray-400 text-[10px] font-bold uppercase mb-1">בוצע</p>
-                        <h3 class="text-2xl font-bold dark:text-white" id="stat-completed">0</h3>
+                        <p class="text-gray-400 text-[10px] uppercase mb-1">בוצע</p>
+                        <h3 id="stat-completed" class="text-2xl font-bold dark:text-white">0</h3>
                     </div>
                 </div>
-
                 <div id="tasks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                <div id="empty-state" class="hidden py-20 text-center text-gray-400 opacity-50">
-                    <i class="fa-solid fa-rocket text-5xl mb-4"></i><p class="heading text-xl">אין משימות כרגע</p>
-                </div>
+                <div id="empty-state" class="hidden py-20 text-center text-slate-400 opacity-50"><i class="fa-solid fa-rocket text-5xl mb-4"></i><p>אין משימות כרגע</p></div>
             </div>
 
             <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30">
-                <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-list-check"></i><span class="text-[10px]">הכל</span></button>
-                <button onclick="app.setFilter('active')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-circle-play"></i><span class="text-[10px]">פעיל</span></button>
-                <div class="w-12"></div> <button onclick="app.setFilter('completed')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-check-double"></i><span class="text-[10px]">בוצע</span></button>
-                <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
+                <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
+                <button onclick="app.setFilter('active')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-clock"></i><span class="text-[10px]">פעיל</span></button>
+                <div class="w-12"></div>
+                <button onclick="app.setFilter('completed')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-check-circle"></i><span class="text-[10px]">בוצע</span></button>
+                <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-circle-half-stroke"></i><span class="text-[10px]">עיצוב</span></button>
             </nav>
-            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40"><i class="fa-solid fa-plus"></i></button>
         </main>
     </div>
 
     <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl z-10 overflow-hidden relative">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden">
             <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
-                <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה חדשה</h3>
+                <h3 id="modal-title" class="font-bold text-lg dark:text-white">משימה חדשה</h3>
                 <button onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
                 <input type="hidden" id="task-id">
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">כותרת</label><input type="text" id="task-title" required class="w-full rounded-xl border-none bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none focus:ring-2 focus:ring-indigo-500"></div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">תיאור</label><textarea id="task-desc" rows="2" class="w-full rounded-xl border-none bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none"></textarea></div>
+                <input type="text" id="task-title" placeholder="כותרת המשימה" required class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                <textarea id="task-desc" placeholder="תיאור..." rows="2" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">קטגוריה</label><select id="task-category" class="w-full rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none"></select></div>
-                    <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">דחיפות</label><select id="task-priority" class="w-full rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none"><option value="3">🔵 רגילה</option><option value="2">🟠 גבוהה</option><option value="1">🔴 דחופה</option></select></div>
+                    <select id="task-category" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none"></select>
+                    <select id="task-priority" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
+                        <option value="3">🔵 רגילה</option><option value="2">🟠 גבוהה</option><option value="1">🔴 דחופה</option>
+                    </select>
                 </div>
-                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">תאריך יעד</label><input type="date" id="task-date" class="w-full rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none"></div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all select-none">שמור שינויים</button>
+                <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
+                <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg select-none">שמור שינויים</button>
             </form>
         </div>
     </div>
 
     <div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl z-10 p-6 text-right relative">
-            <h3 id="cat-modal-title" class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl relative z-10 p-6 text-right">
+            <h3 class="text-xl font-bold dark:text-white mb-6">ניהול קטגוריה</h3>
             <input type="hidden" id="edit-cat-id">
             <div class="space-y-4">
-                <div><label class="text-[10px] font-bold text-gray-400 mb-1 block">שם הקטגוריה</label><input type="text" id="cat-name-input" class="w-full rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white py-3 px-4 outline-none focus:ring-2 focus:ring-indigo-500"></div>
-                <div><label class="text-[10px] font-bold text-gray-400 mb-2 block">צבע</label><div id="color-palette" class="grid grid-cols-5 gap-3"></div></div>
+                <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                <div id="color-palette" class="grid grid-cols-5 gap-3"></div>
                 <div class="pt-4 flex flex-col gap-2">
-                    <button onclick="app.saveCategory()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold shadow-md select-none">שמור</button>
-                    <button onclick="app.deleteCategory()" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm hover:bg-red-50 rounded-xl select-none">מחק קטגוריה</button>
+                    <button onclick="app.saveCategory()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold shadow-md">שמור</button>
+                    <button onclick="app.deleteCategory()" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק קטגוריה</button>
                 </div>
             </div>
         </div>
@@ -240,15 +213,7 @@
         const auth = getAuth(fApp);
         const artifactId = 'task-manager-109e0';
 
-        const appState = {
-            profile: null,
-            tasks: [],
-            categories: [],
-            filter: 'all',
-            palette: ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#10b981', '#06b6d4', '#3b82f6', '#64748b'],
-            selectedColor: '#6366f1',
-            listeners: []
-        };
+        const appState = { profile: null, tasks: [], categories: [], filter: 'all', palette: ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#10b981', '#06b6d4', '#3b82f6', '#64748b'], selectedColor: '#6366f1', listeners: [] };
 
         const app = {
             async loginAs(profile) {
@@ -259,9 +224,7 @@
                     document.getElementById('main-app').classList.remove('hidden');
                     this.updateProfileUI(profile);
                     this.startSync();
-                } catch (e) {
-                    Swal.fire('שגיאת התחברות', 'ודא ש-Anonymous Auth מופעל ב-Firebase.', 'error');
-                }
+                } catch (e) { Swal.fire('שגיאה', 'ודא ש-Anonymous Auth מופעל.', 'error'); }
             },
 
             updateProfileUI(p) {
@@ -274,23 +237,21 @@
 
             startSync() {
                 appState.listeners.forEach(unsub => unsub());
-                const pathBase = `artifacts/${artifactId}/users/${appState.profile}`;
-
-                const unsubCats = onSnapshot(collection(db, `${pathBase}/categories`), snap => {
+                const base = `artifacts/${artifactId}/users/${appState.profile}`;
+                
+                appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
                     appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     if (appState.categories.length === 0) this.seedInitialCategories();
                     this.renderSidebarCategories();
                     this.renderTasks();
-                }, err => console.error("Permission error:", err));
+                }));
 
-                const unsubTasks = onSnapshot(collection(db, `${pathBase}/tasks`), snap => {
+                appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), snap => {
                     appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     this.renderStats();
                     this.renderTasks();
                     this.flashSync();
-                });
-
-                appState.listeners = [unsubCats, unsubTasks];
+                }));
             },
 
             async seedInitialCategories() {
@@ -314,30 +275,27 @@
 
                 filtered.forEach(task => {
                     const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'ללא', color: '#999' };
-                    const card = document.createElement('div');
-                    card.className = `task-card bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border relative priority-${task.priority} ${task.completed ? 'opacity-50' : ''}`;
-                    card.innerHTML = `
+                    const div = document.createElement('div');
+                    div.className = `task-card bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border relative priority-${task.priority} ${task.completed ? 'opacity-50' : ''}`;
+                    div.innerHTML = `
                         <div class="flex justify-between items-start mb-3">
                             <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-lg cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}">
                                 ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="app.openTaskModal('${task.id}')" class="text-slate-300 hover:text-blue-500"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="app.deleteTask('${task.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash text-xs"></i></button>
+                            <div class="flex gap-2 text-slate-300">
+                                <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">${cat.name}</span>
-                        </div>
-                        <h4 class="font-bold dark:text-white ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
+                        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase">${cat.name}</span></div>
+                        <h4 class="font-bold dark:text-white ${task.completed ? 'line-through' : ''}">${task.title}</h4>
                         <p class="text-xs text-slate-500 mt-2 line-clamp-2">${task.description || ''}</p>
                         <div class="mt-4 pt-4 border-t dark:border-slate-700 flex justify-between items-center text-[10px] text-slate-400 font-bold">
                             <span><i class="fa-regular fa-calendar ml-1"></i>${task.dueDate || 'ללא תאריך'}</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 uppercase">${task.priority == 1 ? 'דחוף' : task.priority == 2 ? 'גבוה' : 'רגיל'}</span>
                         </div>
                     `;
-                    container.appendChild(card);
+                    container.appendChild(div);
                 });
             },
 
@@ -349,7 +307,6 @@
                         const snap = await getDocs(collection(db, path));
                         for (const d of snap.docs) await deleteDoc(d.ref);
                     }
-                    
                     for (let i = 0; i < data.tasks.length; i += 500) {
                         const batch = writeBatch(db);
                         data.tasks.slice(i, i + 500).forEach(t => {
@@ -392,10 +349,10 @@
                 container.innerHTML = '';
                 appState.categories.forEach(cat => {
                     const btn = document.createElement('div');
-                    btn.className = `group flex items-center justify-between px-4 py-2 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav font-bold' : 'text-slate-500 hover:bg-gray-100'}`;
-                    btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); };
+                    btn.className = `group flex items-center justify-between px-4 py-2 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav' : 'text-slate-500 hover:bg-gray-100'}`;
+                    btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
                     btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div>
-                    <i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100"></i>`;
+                    <i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
                     container.appendChild(btn);
                 });
                 document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -415,10 +372,7 @@
             async deleteCategory() {
                 const id = document.getElementById('edit-cat-id').value;
                 const res = await Swal.fire({ title: 'מחיקה?', text: 'כל המשימות בקטגוריה יימחקו!', icon: 'warning', showCancelButton: true });
-                if (res.isConfirmed) {
-                    await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id));
-                    this.closeCategoryModal();
-                }
+                if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
             },
 
             renderPalette() {
@@ -452,26 +406,24 @@
                     document.getElementById('cat-name-input').value = c.name;
                     appState.selectedColor = c.color;
                     document.getElementById('btn-delete-cat').classList.remove('hidden');
-                } else {
-                    document.getElementById('cat-name-input').value = '';
-                    document.getElementById('edit-cat-id').value = '';
-                    document.getElementById('btn-delete-cat').classList.add('hidden');
-                }
+                } else { document.getElementById('cat-name-input').value = ''; document.getElementById('edit-cat-id').value = ''; document.getElementById('btn-delete-cat').classList.add('hidden'); }
                 this.renderPalette();
             },
             closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
             setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); },
             toggleTheme() { document.documentElement.classList.toggle('dark'); },
+            toggleSidebar() {
+                const sb = document.getElementById('sidebar');
+                const ov = document.getElementById('sidebar-overlay');
+                const isHidden = sb.classList.contains('translate-x-full');
+                sb.classList.toggle('translate-x-full', !isHidden);
+                ov.classList.toggle('hidden', !isHidden);
+            },
             renderStats() {
                 const t = appState.tasks.length, c = appState.tasks.filter(x => x.completed).length;
-                document.getElementById('stat-total').innerText = t;
-                document.getElementById('stat-active').innerText = t - c;
-                document.getElementById('stat-completed').innerText = c;
+                document.getElementById('stat-total').innerText = t; document.getElementById('stat-active').innerText = t - c; document.getElementById('stat-completed').innerText = c;
             },
-            flashSync() {
-                const i = document.getElementById('sync-indicator');
-                i.classList.remove('hidden'); setTimeout(() => i.classList.add('hidden'), 1000);
-            },
+            flashSync() { const i = document.getElementById('sync-indicator'); i.classList.remove('hidden'); setTimeout(() => i.classList.add('hidden'), 1000); },
             exportTasks() {
                 const b = new Blob([JSON.stringify({ tasks: appState.tasks, categories: appState.categories })], { type: 'application/json' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'tasks_backup.json'; a.click();
