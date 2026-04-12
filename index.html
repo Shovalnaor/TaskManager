@@ -24,30 +24,24 @@
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .dark .glass { background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Sidebar Drawer Logic */
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-            z-index: 50;
-        }
-
+        #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
         .task-card { transition: all 0.3s ease; border-right: 4px solid transparent; }
         .priority-1 { border-right-color: #ef4444 !important; }
         .priority-2 { border-right-color: #f97316 !important; }
         .priority-3 { border-right-color: #3b82f6 !important; }
 
         .active-nav { background-color: #4f46e5 !important; color: white !important; }
-        
         input, select, textarea { font-size: 16px !important; }
 
         #main-content-scroll {
             height: calc(100vh - 5rem);
             overflow-y: auto;
-            padding-bottom: 8rem;
+            padding-bottom: 9rem;
         }
         .select-none { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
 
     <input type="file" id="json-file-input" accept=".json" class="hidden">
 
@@ -75,7 +69,7 @@
 
     <div id="main-app" class="flex h-screen w-full overflow-hidden hidden">
         
-        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col">
+        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
             <div class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-700">
                 <span class="text-2xl font-extrabold text-indigo-600 heading">TaskMaster</span>
                 <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -117,7 +111,7 @@
             <header class="h-20 flex-shrink-0 glass flex items-center justify-between px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-4">
                     <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white"><i class="fa-solid fa-bars-staggered text-xl"></i></button>
-                    <h1 id="page-title" class="text-xl font-bold dark:text-white heading">לוח עבודה</h1>
+                    <h1 class="text-xl font-bold dark:text-white heading">לוח עבודה</h1>
                 </div>
                 <div class="flex items-center gap-4">
                     <div id="sync-indicator" class="hidden text-green-500 text-[10px]"><i class="fa-solid fa-sync animate-spin"></i></div>
@@ -127,7 +121,7 @@
 
             <div id="main-content-scroll" class="px-4 md:px-8 py-6">
                 <div class="grid grid-cols-3 gap-4 mb-8">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border dark:border-slate-700">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm">
                         <p class="text-gray-400 text-[10px] uppercase mb-1">סה"כ</p>
                         <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
                     </div>
@@ -157,14 +151,14 @@
 
     <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right">
             <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
                 <h3 id="modal-title" class="font-bold text-lg dark:text-white">משימה חדשה</h3>
                 <button onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
+            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4">
                 <input type="hidden" id="task-id">
-                <input type="text" id="task-title" placeholder="כותרת המשימה" required class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="task-title" placeholder="כותרת המשימה" required class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
                 <textarea id="task-desc" placeholder="תיאור..." rows="2" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <select id="task-category" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none"></select>
@@ -173,7 +167,7 @@
                     </select>
                 </div>
                 <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
-                <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg select-none">שמור שינויים</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">שמור שינויים</button>
             </form>
         </div>
     </div>
@@ -184,10 +178,10 @@
             <h3 class="text-xl font-bold dark:text-white mb-6">ניהול קטגוריה</h3>
             <input type="hidden" id="edit-cat-id">
             <div class="space-y-4">
-                <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
                 <div id="color-palette" class="grid grid-cols-5 gap-3"></div>
                 <div class="pt-4 flex flex-col gap-2">
-                    <button onclick="app.saveCategory()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold shadow-md">שמור</button>
+                    <button onclick="app.saveCategory()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold">שמור</button>
                     <button onclick="app.deleteCategory()" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק קטגוריה</button>
                 </div>
             </div>
@@ -224,29 +218,27 @@
                     document.getElementById('main-app').classList.remove('hidden');
                     this.updateProfileUI(profile);
                     this.startSync();
-                } catch (e) { Swal.fire('שגיאה', 'ודא ש-Anonymous Auth מופעל.', 'error'); }
+                } catch (e) { Swal.fire('שגיאה', 'ודא ש-Anonymous Auth מופעל ב-Firebase.', 'error'); }
             },
 
             updateProfileUI(p) {
                 const isUser = p === 'user';
                 const av = document.getElementById('user-avatar');
-                av.className = `w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
+                av.className = `w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
                 av.innerHTML = isUser ? '<i class="fa-solid fa-user-tie"></i>' : '<i class="fa-solid fa-user-astronaut"></i>';
                 document.getElementById('user-display-name').innerText = isUser ? "אני" : "אשתי";
             },
 
             startSync() {
                 appState.listeners.forEach(unsub => unsub());
-                const base = `artifacts/${artifactId}/users/${appState.profile}`;
-                
-                appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
+                const pathBase = `artifacts/${artifactId}/users/${appState.profile}`;
+                appState.listeners.push(onSnapshot(collection(db, `${pathBase}/categories`), snap => {
                     appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     if (appState.categories.length === 0) this.seedInitialCategories();
                     this.renderSidebarCategories();
                     this.renderTasks();
                 }));
-
-                appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), snap => {
+                appState.listeners.push(onSnapshot(collection(db, `${pathBase}/tasks`), snap => {
                     appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     this.renderStats();
                     this.renderTasks();
@@ -270,80 +262,67 @@
                     if (appState.filter !== 'all') return t.categoryId === appState.filter;
                     return true;
                 }).sort((a,b) => a.priority - b.priority);
-
                 document.getElementById('empty-state').classList.toggle('hidden', filtered.length > 0);
-
                 filtered.forEach(task => {
                     const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'ללא', color: '#999' };
-                    const div = document.createElement('div');
-                    div.className = `task-card bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border relative priority-${task.priority} ${task.completed ? 'opacity-50' : ''}`;
-                    div.innerHTML = `
+                    const card = document.createElement('div');
+                    card.className = `task-card bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border relative priority-${task.priority} ${task.completed ? 'opacity-50' : ''}`;
+                    card.innerHTML = `
                         <div class="flex justify-between items-start mb-3">
                             <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-lg cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}">
                                 ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                             </div>
-                            <div class="flex gap-2 text-slate-300">
-                                <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+                            <div class="flex gap-2">
+                                <button onclick="app.openTaskModal('${task.id}')" class="text-slate-300 hover:text-blue-500"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="app.deleteTask('${task.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash text-xs"></i></button>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase">${cat.name}</span></div>
-                        <h4 class="font-bold dark:text-white ${task.completed ? 'line-through' : ''}">${task.title}</h4>
+                        <h4 class="font-bold dark:text-white ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
                         <p class="text-xs text-slate-500 mt-2 line-clamp-2">${task.description || ''}</p>
-                        <div class="mt-4 pt-4 border-t dark:border-slate-700 flex justify-between items-center text-[10px] text-slate-400 font-bold">
-                            <span><i class="fa-regular fa-calendar ml-1"></i>${task.dueDate || 'ללא תאריך'}</span>
-                            <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 uppercase">${task.priority == 1 ? 'דחוף' : task.priority == 2 ? 'גבוה' : 'רגיל'}</span>
-                        </div>
                     `;
-                    container.appendChild(div);
+                    container.appendChild(card);
                 });
             },
 
             async performImport(data, shouldClear) {
-                Swal.fire({ title: 'מייבא...', didOpen: () => Swal.showLoading() });
+                Swal.fire({ title: 'מייבא...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
                 try {
                     const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
                     if (shouldClear) {
                         const snap = await getDocs(collection(db, path));
                         for (const d of snap.docs) await deleteDoc(d.ref);
                     }
-                    for (let i = 0; i < data.tasks.length; i += 500) {
+                    const tasks = data.tasks;
+                    for (let i = 0; i < tasks.length; i += 500) {
                         const batch = writeBatch(db);
-                        data.tasks.slice(i, i + 500).forEach(t => {
+                        tasks.slice(i, i + 500).forEach(t => {
                             const nt = {...t}; delete nt.id;
                             batch.set(doc(collection(db, path)), nt);
                         });
                         await batch.commit();
                     }
-                    Swal.fire('הושלם!', `${data.tasks.length} משימות יובאו.`, 'success');
-                } catch (e) { Swal.fire('שגיאה', 'הייבוא נכשל.', 'error'); }
+                    Swal.fire('הושלם!', `יובאו ${tasks.length} רשומות.`, 'success');
+                } catch (e) { 
+                    console.error(e);
+                    Swal.close();
+                    Swal.fire('שגיאה', `הייבוא נכשל: ${e.message}`, 'error'); 
+                }
             },
 
-            async toggleComplete(id, current) {
-                await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), { completed: !current });
-            },
-
+            async toggleComplete(id, current) { await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), { completed: !current }); },
             async saveTask(e) {
                 e.preventDefault();
                 const id = document.getElementById('task-id').value;
-                const data = {
-                    title: document.getElementById('task-title').value,
-                    description: document.getElementById('task-desc').value,
-                    categoryId: document.getElementById('task-category').value,
-                    priority: parseInt(document.getElementById('task-priority').value),
-                    dueDate: document.getElementById('task-date').value,
-                    updatedAt: Date.now()
-                };
+                const data = { title: document.getElementById('task-title').value, description: document.getElementById('task-desc').value, categoryId: document.getElementById('task-category').value, priority: parseInt(document.getElementById('task-priority').value), dueDate: document.getElementById('task-date').value, updatedAt: Date.now() };
                 if (id) await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), data);
                 else await addDoc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`), { ...data, completed: false, createdAt: Date.now() });
                 this.closeTaskModal();
             },
-
             async deleteTask(id) {
                 const res = await Swal.fire({ title: 'מחיקה?', icon: 'warning', showCancelButton: true });
                 if (res.isConfirmed) await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id));
             },
-
             renderSidebarCategories() {
                 const container = document.getElementById('sidebar-categories');
                 container.innerHTML = '';
@@ -352,59 +331,39 @@
                     btn.className = `group flex items-center justify-between px-4 py-2 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav' : 'text-slate-500 hover:bg-gray-100'}`;
                     btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
                     btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div>
-                    <i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
+                    <i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100"></i>`;
                     container.appendChild(btn);
                 });
                 document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             },
-
             async saveCategory() {
-                const id = document.getElementById('edit-cat-id').value;
-                const name = document.getElementById('cat-name-input').value.trim();
+                const id = document.getElementById('edit-cat-id').value, name = document.getElementById('cat-name-input').value.trim();
                 if (!name) return;
-                const data = { name, color: appState.selectedColor };
-                const path = `artifacts/${artifactId}/users/${appState.profile}/categories`;
-                if (id) await updateDoc(doc(db, path, id), data);
-                else await addDoc(collection(db, path), data);
+                const d = { name, color: appState.selectedColor }, path = `artifacts/${artifactId}/users/${appState.profile}/categories`;
+                if (id) await updateDoc(doc(db, path, id), d); else await addDoc(collection(db, path), d);
                 this.closeCategoryModal();
             },
-
             async deleteCategory() {
                 const id = document.getElementById('edit-cat-id').value;
-                const res = await Swal.fire({ title: 'מחיקה?', text: 'כל המשימות בקטגוריה יימחקו!', icon: 'warning', showCancelButton: true });
+                const res = await Swal.fire({ title: 'מחיקה?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
                 if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
             },
-
             renderPalette() {
-                const container = document.getElementById('color-palette');
-                container.innerHTML = appState.palette.map(c => `<div class="w-8 h-8 rounded-full cursor-pointer border-2 ${appState.selectedColor === c ? 'border-indigo-500 scale-110 shadow-lg' : 'border-transparent'}" style="background:${c}" onclick="app.selectedColor = '${c}'; app.renderPalette();"></div>`).join('');
+                document.getElementById('color-palette').innerHTML = appState.palette.map(c => `<div class="w-8 h-8 rounded-full cursor-pointer border-2 ${appState.selectedColor === c ? 'border-indigo-500 scale-110' : 'border-transparent'}" style="background:${c}" onclick="app.selectedColor = '${c}'; app.renderPalette();"></div>`).join('');
             },
-
             openTaskModal(tid = null) {
                 document.getElementById('task-modal').classList.remove('hidden');
                 if (tid) {
                     const t = appState.tasks.find(x => x.id === tid);
-                    document.getElementById('task-id').value = t.id;
-                    document.getElementById('task-title').value = t.title;
-                    document.getElementById('task-desc').value = t.description;
-                    document.getElementById('task-priority').value = t.priority;
-                    document.getElementById('task-category').value = t.categoryId;
-                    document.getElementById('task-date').value = t.dueDate;
-                    document.getElementById('modal-title').innerText = "עריכת משימה";
-                } else {
-                    document.getElementById('task-form').reset();
-                    document.getElementById('task-id').value = '';
-                    document.getElementById('modal-title').innerText = "משימה חדשה";
-                }
+                    document.getElementById('task-id').value = t.id; document.getElementById('task-title').value = t.title; document.getElementById('task-desc').value = t.description; document.getElementById('task-priority').value = t.priority; document.getElementById('task-category').value = t.categoryId; document.getElementById('task-date').value = t.dueDate;
+                } else { document.getElementById('task-form').reset(); document.getElementById('task-id').value = ''; }
             },
             closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
             openCategoryModal(cid = null) {
                 document.getElementById('category-modal').classList.remove('hidden');
                 if (cid) {
                     const c = appState.categories.find(x => x.id === cid);
-                    document.getElementById('edit-cat-id').value = c.id;
-                    document.getElementById('cat-name-input').value = c.name;
-                    appState.selectedColor = c.color;
+                    document.getElementById('edit-cat-id').value = c.id; document.getElementById('cat-name-input').value = c.name; appState.selectedColor = c.color;
                     document.getElementById('btn-delete-cat').classList.remove('hidden');
                 } else { document.getElementById('cat-name-input').value = ''; document.getElementById('edit-cat-id').value = ''; document.getElementById('btn-delete-cat').classList.add('hidden'); }
                 this.renderPalette();
@@ -413,11 +372,8 @@
             setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); },
             toggleTheme() { document.documentElement.classList.toggle('dark'); },
             toggleSidebar() {
-                const sb = document.getElementById('sidebar');
-                const ov = document.getElementById('sidebar-overlay');
-                const isHidden = sb.classList.contains('translate-x-full');
-                sb.classList.toggle('translate-x-full', !isHidden);
-                ov.classList.toggle('hidden', !isHidden);
+                const sb = document.getElementById('sidebar'), ov = document.getElementById('sidebar-overlay'), isH = sb.classList.contains('translate-x-full');
+                sb.classList.toggle('translate-x-full', !isH); ov.classList.toggle('hidden', !isH);
             },
             renderStats() {
                 const t = appState.tasks.length, c = appState.tasks.filter(x => x.completed).length;
@@ -435,9 +391,11 @@
         document.getElementById('json-file-input').onchange = (e) => {
             const reader = new FileReader();
             reader.onload = async (ev) => {
-                const data = JSON.parse(ev.target.result);
-                const res = await Swal.fire({ title: 'ייבוא', text: 'האם להחליף הכל או רק למזג?', showCancelButton: true, confirmButtonText: 'החלף', cancelButtonText: 'מזג' });
-                app.performImport(data, res.isConfirmed);
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    const res = await Swal.fire({ title: 'ייבוא', text: 'להחליף הכל או למזג?', showCancelButton: true, confirmButtonText: 'החלף', cancelButtonText: 'מזג' });
+                    app.performImport(data, res.isConfirmed);
+                } catch(e) { Swal.fire('שגיאה', 'קובץ לא תקין', 'error'); }
             };
             reader.readAsText(e.target.files[0]);
         };
