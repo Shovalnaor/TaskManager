@@ -42,7 +42,7 @@
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
                 <h1 class="text-3xl font-bold text-white heading mb-2">TaskMaster Pro</h1>
-                <p class="text-slate-400">ניהול משימות משותף לשובל והני</p>
+                <p class="text-slate-400">ניהול משימות משותף לשובל וחני</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div onclick="app.loginAs('user')" class="bg-white p-6 rounded-3xl shadow-xl cursor-pointer hover:scale-105 transition-all select-none">
@@ -51,7 +51,7 @@
                 </div>
                 <div onclick="app.loginAs('wife')" class="bg-white p-6 rounded-3xl shadow-xl cursor-pointer hover:scale-105 transition-all select-none">
                     <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-user-astronaut"></i></div>
-                    <h3 class="font-bold">הני</h3>
+                    <h3 class="font-bold">חני</h3>
                 </div>
             </div>
         </div>
@@ -258,7 +258,7 @@
                 const isUser = p === 'user', av = document.getElementById('user-avatar');
                 av.className = `w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
                 av.innerHTML = isUser ? '<i class="fa-solid fa-user-tie"></i>' : '<i class="fa-solid fa-user-astronaut"></i>';
-                document.getElementById('user-display-name').innerText = isUser ? "שובל" : "הני";
+                document.getElementById('user-display-name').innerText = isUser ? "שובל" : "חני";
             },
 
             async loadStreak() {
