@@ -12,8 +12,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <style>
         ::-webkit-scrollbar { width: 5px; }
@@ -23,16 +25,28 @@
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .dark .glass { background: rgba(30, 41, 59, 0.85); }
         #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
-        .task-card { transition: all 0.2s ease; border-right: 4px solid transparent; }
-        .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; }
-        .priority-1 { border-right-color: #ef4444; }
-        .priority-2 { border-right-color: #f97316; }
-        .priority-3 { border-right-color: #3b82f6; }
+        
+        /* Priority Visual Emphasis */
+        .task-card { transition: all 0.2s ease; border-right: 6px solid transparent; }
+        .priority-1 { border-right-color: #ef4444; background-color: #fff5f5; }
+        .priority-2 { border-right-color: #f97316; background-color: #fffaf5; }
+        .priority-3 { border-right-color: #3b82f6; background-color: #f5faff; }
+        
+        .dark .priority-1 { background-color: rgba(239, 68, 68, 0.08); }
+        .dark .priority-2 { background-color: rgba(249, 115, 22, 0.08); }
+        .dark .priority-3 { background-color: rgba(59, 130, 246, 0.08); }
+
+        .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; animation: border-pulse 2s infinite; }
+        @keyframes border-pulse { 0% { border-right-width: 6px; } 50% { border-right-width: 12px; } 100% { border-right-width: 6px; } }
+
+        .sortable-ghost { opacity: 0.4; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
+        .grab-handle { cursor: grab; padding: 5px; }
+
         .active-nav { background-color: #4f46e5 !important; color: white !important; }
         input, select, textarea { font-size: 16px !important; }
         #main-content-scroll { height: calc(100vh - 5rem); overflow-y: auto; padding-bottom: 10rem; }
         .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
-        .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+        .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .select-none { user-select: none; -webkit-user-select: none; }
     </style>
@@ -53,11 +67,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="app.loginAs('user')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
                     <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-tie"></i></div>
-                    <span class="font-bold">שובל</span>
+                    <span class="font-bold text-slate-800">שובל</span>
                 </button>
                 <button onclick="app.loginAs('wife')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
                     <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-astronaut"></i></div>
-                    <span class="font-bold">חני</span>
+                    <span class="font-bold text-slate-800">חני</span>
                 </button>
             </div>
         </div>
@@ -111,7 +125,15 @@
             <header class="h-20 glass flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-3 flex-1 max-w-xl">
                     <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white p-2"><i class="fa-solid fa-bars-staggered"></i></button>
-                    <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש משימה..." class="w-full bg-slate-100 dark:bg-slate-800 dark:text-white border-none rounded-2xl py-2.5 px-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <div class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl px-4">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש..." class="w-full bg-transparent border-none py-2.5 outline-none dark:text-white">
+                        <div class="flex items-center border-r border-slate-300 pr-2 mr-2">
+                            <i class="fa-solid fa-calendar-day text-slate-400 text-sm ml-2"></i>
+                            <input type="date" id="date-filter" oninput="app.renderTasks()" class="bg-transparent border-none text-xs outline-none dark:text-white cursor-pointer w-24">
+                            <button onclick="document.getElementById('date-filter').value=''; app.renderTasks();" class="text-slate-400 hover:text-red-500 mr-1"><i class="fa-solid fa-circle-xmark text-[10px]"></i></button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="flex items-center gap-2">
@@ -119,7 +141,7 @@
                         <button onclick="app.setViewMode('grid')" id="btn-grid" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm"><i class="fa-solid fa-grip"></i></button>
                         <button onclick="app.setViewMode('list')" id="btn-list" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400"><i class="fa-solid fa-list-ul"></i></button>
                     </div>
-                    <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 transition-all select-none">+ חדש</button>
+                    <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all select-none">+ חדש</button>
                 </div>
             </header>
 
@@ -140,7 +162,7 @@
                 </div>
 
                 <div id="tasks-container"></div>
-                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-ghost text-6xl mb-4"></i><p class="text-xl">אין משימות כאן...</p></div>
+                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i><p class="text-xl">אין משימות להצגה בתאריך זה</p></div>
             </div>
 
             <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30 shadow-lg">
@@ -150,7 +172,7 @@
                 <button onclick="app.setFilter('active')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-clock"></i><span class="text-[10px]">פעיל</span></button>
                 <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
             </nav>
-            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40"><i class="fa-solid fa-plus"></i></button>
         </main>
     </div>
 
@@ -168,27 +190,28 @@
                     <h4 id="weekly-streak" class="text-3xl font-black text-orange-500">0</h4>
                 </div>
             </div>
-            <h4 class="text-sm font-bold dark:text-white mb-3">🔥 מומלץ להיום (לפי תאריך):</h4>
             <div id="today-suggestions" class="space-y-2 mb-8"></div>
-            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold">סגור</button>
+            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">סגור</button>
         </div>
     </div>
 
     <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 text-right overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right">
             <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
                 <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה</h3>
                 <button type="button" onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4">
+            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
                 <input type="hidden" id="task-id">
                 <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
                 <textarea id="task-desc" placeholder="פירוט (אופציונלי)..." rows="2" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <select id="task-category" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none cursor-pointer"></select>
                     <select id="task-priority" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
-                        <option value="3">🔵 רגילה</option><option value="2">🟠 גבוהה</option><option value="1">🔴 דחופה</option>
+                        <option value="1">🔴 דחופה מאוד</option>
+                        <option value="2">🟠 עדיפות גבוהה</option>
+                        <option value="3" selected>🔵 רגילה</option>
                     </select>
                 </div>
                 <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
@@ -230,7 +253,7 @@
         const auth = getAuth(fApp);
         const artifactId = 'task-manager-109e0';
 
-        const appState = { profile: null, tasks: [], categories: [], filter: 'all', viewMode: 'grid', listeners: [], stats: { streak: 0 } };
+        const appState = { profile: null, tasks: [], categories: [], filter: 'all', viewMode: 'grid', listeners: [], stats: { streak: 0 }, sortableInstance: null };
 
         const app = {
             async loginAs(profile) {
@@ -276,7 +299,6 @@
                 if (e) e.preventDefault();
                 const btn = document.getElementById('btn-save-task');
                 btn.disabled = true; btn.innerText = "שומר...";
-                
                 try {
                     const id = document.getElementById('task-id').value;
                     const data = {
@@ -287,36 +309,34 @@
                         dueDate: document.getElementById('task-date').value,
                         updatedAt: Date.now()
                     };
-
                     const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
                     if (id) await updateDoc(doc(db, path, id), data);
-                    else await addDoc(collection(db, path), { ...data, completed: false, createdAt: Date.now() });
-                    
+                    else await addDoc(collection(db, path), { ...data, completed: false, createdAt: Date.now(), order: appState.tasks.length });
                     this.closeTaskModal();
-                } catch (err) {
-                    Swal.fire('שגיאה', 'שמירה נכשלה.', 'error');
-                } finally {
-                    btn.disabled = false; btn.innerText = "שמור שינויים";
-                }
+                } catch (err) { Swal.fire('שגיאה', 'שמירה נכשלה.', 'error'); } 
+                finally { btn.disabled = false; btn.innerText = "שמור שינויים"; }
             },
 
             renderTasks() {
                 const container = document.getElementById('tasks-container');
                 const search = document.getElementById('search-input').value.toLowerCase();
+                const dateFilter = document.getElementById('date-filter').value;
                 container.innerHTML = '';
                 const now = new Date().setHours(0,0,0,0);
 
                 const filtered = appState.tasks.filter(t => {
-                    const match = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
-                    if (appState.filter === 'active') return match && !t.completed;
-                    if (appState.filter === 'completed') return match && t.completed;
-                    if (appState.filter !== 'all') return match && t.categoryId === appState.filter;
-                    return match;
+                    const matchSearch = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
+                    const matchDate = !dateFilter || t.dueDate === dateFilter;
+                    
+                    if (appState.filter === 'active') return matchSearch && matchDate && !t.completed;
+                    if (appState.filter === 'completed') return matchSearch && matchDate && t.completed;
+                    if (appState.filter !== 'all') return matchSearch && matchDate && t.categoryId === appState.filter;
+                    return matchSearch && matchDate;
                 }).sort((a,b) => {
                     const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
                     const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
                     if (dateA !== dateB) return dateA - dateB;
-                    return a.priority - b.priority;
+                    return (a.order || 0) - (b.order || 0); 
                 });
 
                 document.getElementById('empty-state').classList.toggle('hidden', filtered.length > 0);
@@ -325,81 +345,85 @@
                 filtered.forEach(task => {
                     const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'כללי', color: '#ccc' };
                     const isOverdue = task.dueDate && new Date(task.dueDate) < now && !task.completed;
+                    const p = task.priority || 3;
+                    const pConfig = {
+                        1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200 ring-1 ring-red-400' },
+                        2: { text: 'עדיפות גבוהה', icon: 'fa-arrow-up', class: 'text-orange-700 bg-orange-200' },
+                        3: { text: 'רגילה', icon: 'fa-minus', class: 'text-blue-700 bg-blue-200' }
+                    }[p];
+
                     const card = document.createElement('div');
-                    card.className = `task-card bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${task.priority} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card ring-2 ring-red-500/10' : ''}`;
+                    card.dataset.id = task.id;
+                    card.className = `task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card' : ''}`;
                     
                     const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL', {day:'numeric', month:'short'}) : 'ללא יעד';
 
-                    if (appState.viewMode === 'grid') {
-                        card.innerHTML = `
-                            <div class="flex justify-between items-start mb-3">
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-3">
                                 <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 dark:border-slate-600'}">
                                     ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="app.openTaskModal('${task.id}')" class="text-slate-300 hover:text-indigo-500"><i class="fa-solid fa-pen text-xs"></i></button>
-                                    <button onclick="app.deleteTask('${task.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash text-xs"></i></button>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase">${cat.name}</span></div>
-                            <h4 class="font-bold dark:text-white ${task.completed ? 'line-through' : ''}">${task.title}</h4>
-                            <p class="text-[10px] mt-2 flex items-center gap-1 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
-                                <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar'}"></i> ${dateStr}
-                            </p>
-                            <p class="text-xs text-slate-500 mt-2 line-clamp-2">${task.description || ''}</p>`;
-                    } else {
-                        card.className += " flex items-center gap-4 py-3 px-6";
-                        card.innerHTML = `
-                            <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex-shrink-0 flex items-center justify-center ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}">${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}</div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-bold text-sm dark:text-white truncate ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
-                                <span class="text-[10px] font-bold ${isOverdue ? 'text-red-600' : 'text-slate-400'}">${dateStr}</span>
+                                <div class="grab-handle text-slate-400 dark:text-slate-500"><i class="fa-solid fa-grip-vertical"></i></div>
                             </div>
                             <div class="flex gap-3 text-slate-300">
-                                <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
-                            </div>`;
-                    }
+                                <button onclick="app.openTaskModal('${task.id}')" class="hover:text-indigo-500"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                <button onclick="app.deleteTask('${task.id}')" class="hover:text-red-500"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">${cat.name}</span></div>
+                            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm ${pConfig.class}">
+                                <i class="fa-solid ${pConfig.icon}"></i> ${pConfig.text}
+                            </span>
+                        </div>
+
+                        <h4 class="font-bold text-lg dark:text-white leading-tight ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
+                        
+                        <p class="text-[11px] mt-3 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
+                            <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar-check'}"></i> ${dateStr} ${isOverdue ? '(בפיגור!)' : ''}
+                        </p>
+                        ${appState.viewMode === 'grid' ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">${task.description || ''}</p>` : ''}
+                    `;
                     container.appendChild(card);
                 });
+
+                this.initSortable();
             },
 
-            async performImport(data, shouldClear) {
-                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                    if (shouldClear) {
-                        const snap = await getDocs(collection(db, path));
-                        for (const d of snap.docs) await deleteDoc(d.ref);
-                    }
-                    const tasks = data.tasks || [];
-                    for (let i = 0; i < tasks.length; i += 500) {
+            initSortable() {
+                const el = document.getElementById('tasks-container');
+                if (appState.sortableInstance) appState.sortableInstance.destroy();
+                appState.sortableInstance = new Sortable(el, {
+                    handle: '.grab-handle',
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onEnd: async () => {
+                        const items = Array.from(el.children);
                         const batch = writeBatch(db);
-                        tasks.slice(i, i + 500).forEach(t => {
-                            const nt = {...t}; delete nt.id;
-                            batch.set(doc(collection(db, path)), nt);
+                        items.forEach((item, index) => {
+                            const ref = doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, item.dataset.id);
+                            batch.update(ref, { order: index });
                         });
                         await batch.commit();
                     }
-                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
-                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
+                });
             },
 
             async runOnboarding() {
                 const batch = writeBatch(db);
                 const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
                 const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now() },
-                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now() }]
+                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
+                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
                 .forEach(s => batch.set(doc(collection(db, base)), s));
                 await batch.commit();
             },
 
             async toggleComplete(id, current) {
-                if (!current) { 
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                    this.updateStreak();
-                }
+                if (!current) { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); this.updateStreak(); }
                 await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), { completed: !current });
             },
 
@@ -436,7 +460,7 @@
                     const dB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
                     return dA - dB;
                 }).slice(0, 3);
-                document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
+                document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
                 document.getElementById('weekly-modal').classList.remove('hidden');
             },
 
@@ -444,6 +468,27 @@
                 const batch = writeBatch(db);
                 [{ name: 'כללי', color: '#6366f1' }, { name: 'בית', color: '#10b981' }].forEach(c => batch.set(doc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/categories`)), c));
                 await batch.commit();
+            },
+
+            async performImport(data, shouldClear) {
+                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if (shouldClear) {
+                        const snap = await getDocs(collection(db, path));
+                        for (const d of snap.docs) await deleteDoc(d.ref);
+                    }
+                    const tasks = data.tasks || [];
+                    for (let i = 0; i < tasks.length; i += 500) {
+                        const batch = writeBatch(db);
+                        tasks.slice(i, i + 500).forEach((t, idx) => {
+                            const nt = {...t}; delete nt.id;
+                            batch.set(doc(collection(db, path)), { ...nt, order: idx });
+                        });
+                        await batch.commit();
+                    }
+                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
+                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
             },
 
             closeWeeklySummary() { document.getElementById('weekly-modal').classList.add('hidden'); },
@@ -458,7 +503,7 @@
                     const btn = document.createElement('div');
                     btn.className = `group flex items-center justify-between px-4 py-2.5 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav shadow-md' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`;
                     btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
-                    btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
+                    btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100"></i>`;
                     container.appendChild(btn);
                 });
                 document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -473,7 +518,7 @@
             },
             async deleteCategory() {
                 const id = document.getElementById('edit-cat-id').value;
-                const res = await Swal.fire({ title: 'מחיקה?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
+                const res = await Swal.fire({ title: 'למחוק?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
                 if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
             },
             setViewMode(mode) {
