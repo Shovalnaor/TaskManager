@@ -26,18 +26,18 @@
         .dark .glass { background: rgba(30, 41, 59, 0.85); }
         #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
         
-        /* Priority Visual Emphasis */
+        /* Priority Emphasis Styles */
         .task-card { transition: all 0.2s ease; border-right: 6px solid transparent; }
-        .priority-1 { border-right-color: #ef4444; background-color: #fff5f5; }
+        .priority-1 { border-right-color: #ef4444; background-color: #fef2f2; }
         .priority-2 { border-right-color: #f97316; background-color: #fffaf5; }
-        .priority-3 { border-right-color: #3b82f6; background-color: #f5faff; }
+        .priority-3 { border-right-color: #3b82f6; background-color: #f8fafc; }
         
-        .dark .priority-1 { background-color: rgba(239, 68, 68, 0.08); }
-        .dark .priority-2 { background-color: rgba(249, 115, 22, 0.08); }
-        .dark .priority-3 { background-color: rgba(59, 130, 246, 0.08); }
+        .dark .priority-1 { background-color: rgba(239, 68, 68, 0.1); }
+        .dark .priority-2 { background-color: rgba(249, 115, 22, 0.1); }
+        .dark .priority-3 { background-color: rgba(59, 130, 246, 0.1); }
 
-        .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; animation: border-pulse 2s infinite; }
-        @keyframes border-pulse { 0% { border-right-width: 6px; } 50% { border-right-width: 12px; } 100% { border-right-width: 6px; } }
+        .overdue-card { background-color: #fee2e2 !important; border-right-color: #dc2626 !important; border-right-width: 10px; animation: pulse-overdue 2s infinite; }
+        @keyframes pulse-overdue { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         .sortable-ghost { opacity: 0.4; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
         .grab-handle { cursor: grab; padding: 5px; }
@@ -47,7 +47,6 @@
         #main-content-scroll { height: calc(100vh - 5rem); overflow-y: auto; padding-bottom: 10rem; }
         .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
         .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .select-none { user-select: none; -webkit-user-select: none; }
     </style>
 </head>
@@ -111,12 +110,12 @@
                 </div>
 
                 <div class="pt-10 border-t dark:border-slate-700 mt-6">
-                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2">גיבוי ונתונים</p>
-                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-400 hover:text-indigo-500"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
-                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-400 hover:text-indigo-500"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
+                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2 text-right">גיבוי ונתונים</p>
+                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
+                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
                 </div>
             </nav>
-            <div class="p-4"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
+            <div class="p-4 border-t dark:border-slate-700"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
         </aside>
 
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="app.toggleSidebar()"></div>
@@ -127,11 +126,10 @@
                     <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white p-2"><i class="fa-solid fa-bars-staggered"></i></button>
                     <div class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl px-4">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
-                        <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש..." class="w-full bg-transparent border-none py-2.5 outline-none dark:text-white">
+                        <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש משימה..." class="w-full bg-transparent border-none py-2.5 outline-none dark:text-white">
                         <div class="flex items-center border-r border-slate-300 pr-2 mr-2">
                             <i class="fa-solid fa-calendar-day text-slate-400 text-sm ml-2"></i>
                             <input type="date" id="date-filter" oninput="app.renderTasks()" class="bg-transparent border-none text-xs outline-none dark:text-white cursor-pointer w-24">
-                            <button onclick="document.getElementById('date-filter').value=''; app.renderTasks();" class="text-slate-400 hover:text-red-500 mr-1"><i class="fa-solid fa-circle-xmark text-[10px]"></i></button>
                         </div>
                     </div>
                 </div>
@@ -146,43 +144,43 @@
             </header>
 
             <div id="main-content-scroll" class="px-4 md:px-8 py-6">
-                <div class="grid grid-cols-3 gap-3 md:gap-6 mb-8">
-                    <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-500">
+                <div class="grid grid-cols-3 gap-3 md:gap-6 mb-8 text-right">
+                    <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-500 transition-all group">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">סה"כ</p>
                         <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
                     </button>
-                    <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-500 hover:bg-orange-50">
+                    <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-500 hover:bg-orange-50 transition-all">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">פעיל</p>
                         <h3 id="stat-active" class="text-2xl font-bold dark:text-white">0</h3>
                     </button>
-                    <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-500 hover:bg-green-50">
+                    <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-500 hover:bg-green-50 transition-all">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">בוצע</p>
                         <h3 id="stat-completed" class="text-2xl font-bold dark:text-white">0</h3>
                     </button>
                 </div>
 
                 <div id="tasks-container"></div>
-                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i><p class="text-xl">אין משימות להצגה בתאריך זה</p></div>
+                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-face-smile text-6xl mb-4"></i><p class="text-xl">אין משימות כאן...</p></div>
             </div>
 
             <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30 shadow-lg">
                 <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
                 <button onclick="app.openWeeklySummary()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-trophy"></i><span class="text-[10px]">סיכום</span></button>
                 <div class="w-10"></div>
-                <button onclick="app.setFilter('active')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-clock"></i><span class="text-[10px]">פעיל</span></button>
+                <button onclick="app.setFilter('active')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-bolt"></i><span class="text-[10px]">פעיל</span></button>
                 <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
             </nav>
-            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
         </main>
     </div>
 
     <div id="weekly-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onclick="app.closeWeeklySummary()"></div>
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 text-right shadow-2xl">
-            <h2 class="text-2xl font-bold dark:text-white heading mb-6 text-center">הסיכום השבועי</h2>
+            <h2 class="text-2xl font-bold dark:text-white heading mb-6 text-center">הסיכום שלכם</h2>
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
-                    <p class="text-xs text-slate-400">הושלמו</p>
+                    <p class="text-xs text-slate-400">בוצעו השבוע</p>
                     <h4 id="weekly-count" class="text-3xl font-black text-indigo-600">0</h4>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
@@ -191,7 +189,7 @@
                 </div>
             </div>
             <div id="today-suggestions" class="space-y-2 mb-8"></div>
-            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">סגור</button>
+            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold">סגור</button>
         </div>
     </div>
 
@@ -202,14 +200,14 @@
                 <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה</h3>
                 <button type="button" onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
+            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4">
                 <input type="hidden" id="task-id">
                 <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-                <textarea id="task-desc" placeholder="פירוט (אופציונלי)..." rows="2" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
+                <textarea id="task-desc" placeholder="פירוט המשימה (יוצג בכרטיס)..." rows="3" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <select id="task-category" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none cursor-pointer"></select>
                     <select id="task-priority" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
-                        <option value="1">🔴 דחופה מאוד</option>
+                        <option value="1">🔴 דחוף מאוד</option>
                         <option value="2">🟠 עדיפות גבוהה</option>
                         <option value="3" selected>🔵 רגילה</option>
                     </select>
@@ -222,14 +220,14 @@
 
     <div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 relative z-10 text-right">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 relative z-10 text-right shadow-2xl">
             <h3 class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
             <input type="hidden" id="edit-cat-id">
-            <div class="space-y-4">
+            <div class="space-y-4 text-right">
                 <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
                 <input type="color" id="cat-color-picker" class="w-full h-12 rounded-xl bg-transparent border-none cursor-pointer">
-                <button onclick="app.saveCategory()" type="button" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">שמור</button>
-                <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק</button>
+                <button onclick="app.saveCategory()" type="button" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-md">שמור</button>
+                <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק קטגוריה</button>
             </div>
         </div>
     </div>
@@ -266,7 +264,7 @@
                     this.updateProfileUI(profile);
                     this.startSync();
                     this.loadStreak();
-                } catch (e) { Swal.fire('שגיאה', 'חיבור Firebase נכשל.', 'error'); }
+                } catch (e) { Swal.fire('שגיאה', 'חיבור נכשל.', 'error'); }
             },
 
             updateProfileUI(p) {
@@ -279,14 +277,12 @@
             startSync() {
                 appState.listeners.forEach(unsub => unsub());
                 const base = `artifacts/${artifactId}/users/${appState.profile}`;
-                
                 appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
                     appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     if (appState.categories.length === 0) this.seedInitialCategories();
                     this.renderSidebarCategories();
                     this.renderTasks();
                 }));
-
                 appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), async snap => {
                     appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     if (appState.tasks.length === 0) await this.runOnboarding();
@@ -327,7 +323,6 @@
                 const filtered = appState.tasks.filter(t => {
                     const matchSearch = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
                     const matchDate = !dateFilter || t.dueDate === dateFilter;
-                    
                     if (appState.filter === 'active') return matchSearch && matchDate && !t.completed;
                     if (appState.filter === 'completed') return matchSearch && matchDate && t.completed;
                     if (appState.filter !== 'all') return matchSearch && matchDate && t.categoryId === appState.filter;
@@ -347,7 +342,7 @@
                     const isOverdue = task.dueDate && new Date(task.dueDate) < now && !task.completed;
                     const p = task.priority || 3;
                     const pConfig = {
-                        1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200 ring-1 ring-red-400' },
+                        1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200' },
                         2: { text: 'עדיפות גבוהה', icon: 'fa-arrow-up', class: 'text-orange-700 bg-orange-200' },
                         3: { text: 'רגילה', icon: 'fa-minus', class: 'text-blue-700 bg-blue-200' }
                     }[p];
@@ -355,51 +350,66 @@
                     const card = document.createElement('div');
                     card.dataset.id = task.id;
                     card.className = `task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card' : ''}`;
-                    
                     const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL', {day:'numeric', month:'short'}) : 'ללא יעד';
 
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-3">
                             <div class="flex items-center gap-3">
-                                <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 dark:border-slate-600'}">
+                                <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white shadow-glow' : 'border-slate-300 dark:border-slate-600'}">
                                     ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
                                 </div>
                                 <div class="grab-handle text-slate-400 dark:text-slate-500"><i class="fa-solid fa-grip-vertical"></i></div>
                             </div>
                             <div class="flex gap-3 text-slate-300">
-                                <button onclick="app.openTaskModal('${task.id}')" class="hover:text-indigo-500"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
-                                <button onclick="app.deleteTask('${task.id}')" class="hover:text-red-500"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                                <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash-can text-sm"></i></button>
                             </div>
                         </div>
-                        
                         <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">${cat.name}</span></div>
-                            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm ${pConfig.class}">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${cat.name}</span></div>
+                            <span class="text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase ${pConfig.class}">
                                 <i class="fa-solid ${pConfig.icon}"></i> ${pConfig.text}
                             </span>
                         </div>
-
                         <h4 class="font-bold text-lg dark:text-white leading-tight ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
-                        
-                        <p class="text-[11px] mt-3 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-white/40 dark:bg-black/10 p-2 rounded-xl border border-slate-100 dark:border-slate-700/50 min-h-[40px]">
+                            ${task.description || '<span class="italic opacity-50">אין תיאור</span>'}
+                        </p>
+                        <p class="text-[11px] mt-4 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
                             <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar-check'}"></i> ${dateStr} ${isOverdue ? '(בפיגור!)' : ''}
                         </p>
-                        ${appState.viewMode === 'grid' ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">${task.description || ''}</p>` : ''}
                     `;
                     container.appendChild(card);
                 });
-
                 this.initSortable();
+            },
+
+            async performImport(data, shouldClear) {
+                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if (shouldClear) {
+                        const snap = await getDocs(collection(db, path));
+                        for (const d of snap.docs) await deleteDoc(d.ref);
+                    }
+                    const tasks = data.tasks || [];
+                    for (let i = 0; i < tasks.length; i += 500) {
+                        const batch = writeBatch(db);
+                        tasks.slice(i, i + 500).forEach((t, idx) => {
+                            const nt = {...t}; delete nt.id;
+                            batch.set(doc(collection(db, path)), { ...nt, order: idx });
+                        });
+                        await batch.commit();
+                    }
+                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
+                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
             },
 
             initSortable() {
                 const el = document.getElementById('tasks-container');
                 if (appState.sortableInstance) appState.sortableInstance.destroy();
                 appState.sortableInstance = new Sortable(el, {
-                    handle: '.grab-handle',
-                    animation: 200,
-                    ghostClass: 'sortable-ghost',
-                    dragClass: 'sortable-drag',
+                    handle: '.grab-handle', animation: 200, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                     onEnd: async () => {
                         const items = Array.from(el.children);
                         const batch = writeBatch(db);
@@ -410,16 +420,6 @@
                         await batch.commit();
                     }
                 });
-            },
-
-            async runOnboarding() {
-                const batch = writeBatch(db);
-                const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
-                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
-                .forEach(s => batch.set(doc(collection(db, base)), s));
-                await batch.commit();
             },
 
             async toggleComplete(id, current) {
@@ -455,40 +455,25 @@
                 const weekly = appState.tasks.filter(t => t.completed && (t.updatedAt || Date.now()) > weekAgo);
                 document.getElementById('weekly-count').innerText = weekly.length;
                 document.getElementById('weekly-streak').innerText = appState.stats.streak;
-                const sug = appState.tasks.filter(t => !t.completed).sort((a,b) => {
-                    const dA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-                    const dB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-                    return dA - dB;
-                }).slice(0, 3);
+                const sug = appState.tasks.filter(t => !t.completed).sort((a,b) => (a.dueDate || '9999') > (b.dueDate || '9999') ? 1 : -1).slice(0, 3);
                 document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
                 document.getElementById('weekly-modal').classList.remove('hidden');
+            },
+
+            async runOnboarding() {
+                const batch = writeBatch(db);
+                const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
+                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
+                .forEach(s => batch.set(doc(collection(db, base)), s));
+                await batch.commit();
             },
 
             async seedInitialCategories() {
                 const batch = writeBatch(db);
                 [{ name: 'כללי', color: '#6366f1' }, { name: 'בית', color: '#10b981' }].forEach(c => batch.set(doc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/categories`)), c));
                 await batch.commit();
-            },
-
-            async performImport(data, shouldClear) {
-                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                    if (shouldClear) {
-                        const snap = await getDocs(collection(db, path));
-                        for (const d of snap.docs) await deleteDoc(d.ref);
-                    }
-                    const tasks = data.tasks || [];
-                    for (let i = 0; i < tasks.length; i += 500) {
-                        const batch = writeBatch(db);
-                        tasks.slice(i, i + 500).forEach((t, idx) => {
-                            const nt = {...t}; delete nt.id;
-                            batch.set(doc(collection(db, path)), { ...nt, order: idx });
-                        });
-                        await batch.commit();
-                    }
-                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
-                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
             },
 
             closeWeeklySummary() { document.getElementById('weekly-modal').classList.add('hidden'); },
