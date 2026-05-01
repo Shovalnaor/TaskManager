@@ -1,931 +1,934 @@
 <!DOCTYPE html>
-
 <html lang="he" dir="rtl" id="main-html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TaskMaster Pro - שובל וחני</title>
-
-```
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
-
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<style>
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Rubik', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .heading { font-family: 'Prata', serif; }
-    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .dark .glass { background: rgba(30, 41, 59, 0.85); }
-    #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
     
-    .task-card { transition: all 0.2s ease; border-right: 6px solid transparent; }
-    .priority-1 { border-right-color: #ef4444; background-color: #fef2f2; }
-    .priority-2 { border-right-color: #f97316; background-color: #fffaf5; }
-    .priority-3 { border-right-color: #3b82f6; background-color: #f8fafc; }
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     
-    .dark .priority-1 { background-color: rgba(239, 68, 68, 0.08); }
-    .dark .priority-2 { background-color: rgba(249, 115, 22, 0.08); }
-    .dark .priority-3 { background-color: rgba(59, 130, 246, 0.08); }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; animation: border-pulse 2s infinite; }
-    @keyframes border-pulse { 0% { border-right-width: 6px; } 50% { border-right-width: 12px; } 100% { border-right-width: 6px; } }
+    <style>
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Rubik', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .heading { font-family: 'Prata', serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass { background: rgba(30, 41, 59, 0.85); }
+        #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
+        
+        .task-card { transition: all 0.2s ease; border-right: 6px solid transparent; }
+        .priority-1 { border-right-color: #ef4444; background-color: #fef2f2; }
+        .priority-2 { border-right-color: #f97316; background-color: #fffaf5; }
+        .priority-3 { border-right-color: #3b82f6; background-color: #f8fafc; }
+        
+        .dark .priority-1 { background-color: rgba(239, 68, 68, 0.08); }
+        .dark .priority-2 { background-color: rgba(249, 115, 22, 0.08); }
+        .dark .priority-3 { background-color: rgba(59, 130, 246, 0.08); }
 
-    .sortable-ghost { opacity: 0.4; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
-    .grab-handle { cursor: grab; padding: 5px; }
+        .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; animation: border-pulse 2s infinite; }
+        @keyframes border-pulse { 0% { border-right-width: 6px; } 50% { border-right-width: 12px; } 100% { border-right-width: 6px; } }
 
-    .active-nav { background-color: #4f46e5 !important; color: white !important; }
-    input, select, textarea { font-size: 16px !important; }
-    #main-content-scroll { height: calc(100vh - 5rem); overflow-y: auto; padding-bottom: 10rem; }
-    .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
-    .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; animation: pulse 2s infinite; }
-    .select-none { user-select: none; -webkit-user-select: none; }
+        .sortable-ghost { opacity: 0.4; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
+        .grab-handle { cursor: grab; padding: 5px; }
 
-    /* Analytics Panel */
-    #analytics-panel { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .chart-tab { transition: all 0.2s; border-bottom: 3px solid transparent; }
-    .chart-tab.active { border-bottom-color: #4f46e5; color: #4f46e5; font-weight: 700; }
-    .dark .chart-tab.active { color: #818cf8; border-bottom-color: #818cf8; }
-    .chart-wrapper { position: relative; height: 220px; }
-    .analytics-card { background: white; border-radius: 1.5rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
-    .dark .analytics-card { background: #1e293b; border-color: #334155; }
-    .category-legend-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
-    .dark .category-legend-item { border-color: #334155; }
-    .progress-bar-fill { height: 6px; border-radius: 3px; transition: width 0.8s ease; }
+        .active-nav { background-color: #4f46e5 !important; color: white !important; }
+        input, select, textarea { font-size: 16px !important; }
+        #main-content-scroll { height: calc(100vh - 5rem); overflow-y: auto; padding-bottom: 10rem; }
+        .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
+        .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; animation: pulse 2s infinite; }
+        .select-none { user-select: none; -webkit-user-select: none; }
 
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-12px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .analytics-animate { animation: slideDown 0.35s ease forwards; }
+        /* Analytics Panel */
+        #analytics-panel { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .chart-tab { transition: all 0.2s; border-bottom: 3px solid transparent; }
+        .chart-tab.active { border-bottom-color: #4f46e5; color: #4f46e5; font-weight: 700; }
+        .dark .chart-tab.active { color: #818cf8; border-bottom-color: #818cf8; }
+        .chart-wrapper { position: relative; height: 220px; }
+        .analytics-card { background: white; border-radius: 1.5rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
+        .dark .analytics-card { background: #1e293b; border-color: #334155; }
+        .category-legend-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+        .dark .category-legend-item { border-color: #334155; }
+        .progress-bar-fill { height: 6px; border-radius: 3px; transition: width 0.8s ease; }
 
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-</style>
-```
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .analytics-animate { animation: slideDown 0.35s ease forwards; }
 
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
 
-```
-<input type="file" id="json-file-input" accept=".json" class="hidden">
+    <input type="file" id="json-file-input" accept=".json" class="hidden">
 
-<div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/95 backdrop-blur-md">
-    <div class="max-w-md w-full text-center">
-        <div class="mb-12">
-            <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
-                <i class="fa-solid fa-layer-group"></i>
-            </div>
-            <h1 class="text-3xl font-bold text-white heading mb-2">TaskMaster Pro</h1>
-            <p class="text-slate-400">ברוכים הבאים, שובל וחני</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="app.loginAs('user')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-tie"></i></div>
-                <span class="font-bold text-slate-800">שובל</span>
-            </button>
-            <button onclick="app.loginAs('wife')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
-                <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-astronaut"></i></div>
-                <span class="font-bold text-slate-800">חני</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="main-app" class="flex h-screen w-full overflow-hidden hidden">
-    
-    <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
-        <div class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-700">
-            <span class="text-2xl font-extrabold text-indigo-600 heading tracking-tight">TaskMaster</span>
-            <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
-
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <div class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-slate-700 rounded-2xl border border-indigo-100">
-                <div class="flex items-center justify-between mb-2">
-                    <span id="streak-counter" class="streak-badge">🔥 0 ימים</span>
-                    <div class="text-[9px] text-slate-400 font-bold"><span class="live-indicator"></span> פעיל</div>
+    <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/95 backdrop-blur-md">
+        <div class="max-w-md w-full text-center">
+            <div class="mb-12">
+                <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
+                    <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div id="user-avatar" class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm"></div>
-                    <span id="user-display-name" class="font-bold text-xs dark:text-white"></span>
-                </div>
-                <button onclick="app.openWeeklySummary()" class="w-full mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase hover:underline">סיכום ביצועים</button>
+                <h1 class="text-3xl font-bold text-white heading mb-2">TaskMaster Pro</h1>
+                <p class="text-slate-400">ברוכים הבאים, שובל וחני</p>
             </div>
-
-            <button onclick="app.setFilter('all')" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all nav-item" id="nav-all">
-                <i class="fa-solid fa-layer-group"></i> <span>כל המשימות</span>
-            </button>
-
-            <div class="pt-6">
-                <div class="flex items-center justify-between px-2 mb-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase">קטגוריות</p>
-                    <button onclick="app.openCategoryModal()" class="text-indigo-500"><i class="fa-solid fa-plus text-xs"></i></button>
-                </div>
-                <div id="sidebar-categories" class="space-y-1"></div>
-            </div>
-
-            <div class="pt-10 border-t dark:border-slate-700 mt-6">
-                <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2 text-right">גיבוי ונתונים</p>
-                <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
-                <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
-            </div>
-        </nav>
-        <div class="p-4"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
-    </aside>
-
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="app.toggleSidebar()"></div>
-
-    <main class="flex-1 flex flex-col relative overflow-hidden">
-        <header class="h-20 glass flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
-            <div class="flex items-center gap-3 flex-1 max-w-xl">
-                <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white p-2"><i class="fa-solid fa-bars-staggered"></i></button>
-                <div class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl px-4">
-                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
-                    <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש..." class="w-full bg-transparent border-none py-2.5 outline-none dark:text-white">
-                    <div class="flex items-center border-r border-slate-300 pr-2 mr-2">
-                        <i class="fa-solid fa-calendar-day text-slate-400 text-sm ml-2"></i>
-                        <input type="date" id="date-filter" oninput="app.renderTasks()" class="bg-transparent border-none text-xs outline-none dark:text-white cursor-pointer w-24">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <!-- Analytics Toggle Button -->
-                <button onclick="app.toggleAnalytics()" id="btn-analytics" class="w-9 h-9 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-indigo-600 relative" title="ניתוח נתונים">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span id="analytics-dot" class="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full hidden"></span>
-                </button>
-                <div class="hidden sm:flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl ml-2">
-                    <button onclick="app.setViewMode('grid')" id="btn-grid" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm"><i class="fa-solid fa-grip"></i></button>
-                    <button onclick="app.setViewMode('list')" id="btn-list" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400"><i class="fa-solid fa-list-ul"></i></button>
-                </div>
-                <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all select-none">+ חדש</button>
-            </div>
-        </header>
-
-        <div id="main-content-scroll" class="px-4 md:px-8 py-6">
-
-            <!-- Stats Row -->
-            <div class="grid grid-cols-3 gap-3 md:gap-6 mb-6 text-right">
-                <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-500 transition-all">
-                    <p class="text-slate-400 text-[10px] uppercase mb-1">סה"כ</p>
-                    <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
-                </button>
-                <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-500 hover:bg-orange-50 transition-all">
-                    <p class="text-slate-400 text-[10px] uppercase mb-1">פעיל</p>
-                    <h3 id="stat-active" class="text-2xl font-bold dark:text-white">0</h3>
-                </button>
-                <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-500 hover:bg-green-50 transition-all">
-                    <p class="text-slate-400 text-[10px] uppercase mb-1">בוצע</p>
-                    <h3 id="stat-completed" class="text-2xl font-bold dark:text-white">0</h3>
-                </button>
-            </div>
-
-            <!-- ===== ANALYTICS PANEL ===== -->
-            <div id="analytics-panel" class="hidden mb-8 analytics-animate">
-                <!-- Tabs -->
-                <div class="flex gap-6 border-b dark:border-slate-700 mb-5 text-sm text-slate-500 dark:text-slate-400">
-                    <button onclick="app.setChartTab('category')" id="tab-category" class="chart-tab active pb-3 px-1">פי קטגוריה</button>
-                    <button onclick="app.setChartTab('priority')" id="tab-priority" class="chart-tab pb-3 px-1">פי עדיפות</button>
-                    <button onclick="app.setChartTab('progress')" id="tab-progress" class="chart-tab pb-3 px-1">התקדמות</button>
-                </div>
-
-                <!-- Tab: Category Charts -->
-                <div id="chart-view-category" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">משימות לפי קטגוריה — עמודות</h4>
-                        <div class="chart-wrapper"><canvas id="chart-bar-category"></canvas></div>
-                    </div>
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח קטגוריות — עוגה</h4>
-                        <div class="chart-wrapper"><canvas id="chart-pie-category"></canvas></div>
-                    </div>
-                    <!-- Legend -->
-                    <div class="analytics-card md:col-span-2">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 text-right">פירוט קטגוריות</h4>
-                        <div id="category-detail-legend" class="space-y-1"></div>
-                    </div>
-                </div>
-
-                <!-- Tab: Priority Charts -->
-                <div id="chart-view-priority" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח לפי עדיפות — עמודות</h4>
-                        <div class="chart-wrapper"><canvas id="chart-bar-priority"></canvas></div>
-                    </div>
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח עדיפות — עוגה</h4>
-                        <div class="chart-wrapper"><canvas id="chart-pie-priority"></canvas></div>
-                    </div>
-                </div>
-
-                <!-- Tab: Progress -->
-                <div id="chart-view-progress" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">סטטוס השלמה לפי קטגוריה</h4>
-                        <div class="chart-wrapper"><canvas id="chart-bar-progress"></canvas></div>
-                    </div>
-                    <div class="analytics-card">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">אחוזי השלמה לפי קטגוריה</h4>
-                        <div id="progress-bars-list" class="space-y-3 py-2"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- ===== END ANALYTICS PANEL ===== -->
-
-            <div id="tasks-container"></div>
-            <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i><p class="text-xl">אין משימות להצגה</p></div>
-        </div>
-
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30 shadow-lg">
-            <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
-            <button onclick="app.openWeeklySummary()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-trophy"></i><span class="text-[10px]">סיכום</span></button>
-            <div class="w-10"></div>
-            <button onclick="app.toggleAnalytics()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-chart-pie"></i><span class="text-[10px]">גרפים</span></button>
-            <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
-        </nav>
-        <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
-    </main>
-</div>
-
-<!-- Weekly Modal -->
-<div id="weekly-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onclick="app.closeWeeklySummary()"></div>
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 text-right shadow-2xl">
-        <h2 class="text-2xl font-bold dark:text-white heading mb-6 text-center">הסיכום השבועי</h2>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
-                <p class="text-xs text-slate-400">הושלמו</p>
-                <h4 id="weekly-count" class="text-3xl font-black text-indigo-600">0</h4>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
-                <p class="text-xs text-slate-400">רצף (Streak)</p>
-                <h4 id="weekly-streak" class="text-3xl font-black text-orange-500">0</h4>
-            </div>
-        </div>
-        <div id="today-suggestions" class="space-y-2 mb-8"></div>
-        <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">סגור</button>
-    </div>
-</div>
-
-<!-- Task Modal -->
-<div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right">
-        <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
-            <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה</h3>
-            <button type="button" onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
-        </div>
-        <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
-            <input type="hidden" id="task-id">
-            <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-            <textarea id="task-desc" placeholder="פירוט המשימה (אופציונלי)..." rows="3" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
             <div class="grid grid-cols-2 gap-4">
-                <select id="task-category" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none cursor-pointer"></select>
-                <select id="task-priority" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
-                    <option value="1">🔴 דחוף מאוד</option>
-                    <option value="2">🟠 עדיפות גבוהה</option>
-                    <option value="3" selected>🔵 רגילה</option>
-                </select>
+                <button onclick="app.loginAs('user')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-tie"></i></div>
+                    <span class="font-bold text-slate-800">שובל</span>
+                </button>
+                <button onclick="app.loginAs('wife')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
+                    <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-user-astronaut"></i></div>
+                    <span class="font-bold text-slate-800">חני</span>
+                </button>
             </div>
-            <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
-            <button type="submit" id="btn-save-task" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">שמור שינויים</button>
-        </form>
-    </div>
-</div>
-
-<!-- Category Modal -->
-<div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
-    <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 relative z-10 text-right shadow-2xl">
-        <h3 class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
-        <input type="hidden" id="edit-cat-id">
-        <div class="space-y-4">
-            <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
-            <input type="color" id="cat-color-picker" class="w-full h-12 rounded-xl bg-transparent border-none cursor-pointer">
-            <button onclick="app.saveCategory()" type="button" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">שמור</button>
-            <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק</button>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, collection, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <div id="main-app" class="flex h-screen w-full overflow-hidden hidden">
+        
+        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
+            <div class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-700">
+                <span class="text-2xl font-extrabold text-indigo-600 heading tracking-tight">TaskMaster</span>
+                <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBnTW2iN51IrUxinwojc4BGEzn5gQSDKBI",
-        authDomain: "task-manager-109e0.firebaseapp.com",
-        projectId: "task-manager-109e0",
-        storageBucket: "task-manager-109e0.firebasestorage.app",
-        messagingSenderId: "489374964203",
-        appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae",
-    };
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <div class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-slate-700 rounded-2xl border border-indigo-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <span id="streak-counter" class="streak-badge">🔥 0 ימים</span>
+                        <div class="text-[9px] text-slate-400 font-bold"><span class="live-indicator"></span> פעיל</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="user-avatar" class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm"></div>
+                        <span id="user-display-name" class="font-bold text-xs dark:text-white"></span>
+                    </div>
+                    <button onclick="app.openWeeklySummary()" class="w-full mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase hover:underline">סיכום ביצועים</button>
+                </div>
 
-    const fApp = initializeApp(firebaseConfig);
-    const db = getFirestore(fApp);
-    const auth = getAuth(fApp);
-    const artifactId = 'task-manager-109e0';
+                <button onclick="app.setFilter('all')" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all nav-item" id="nav-all">
+                    <i class="fa-solid fa-layer-group"></i> <span>כל המשימות</span>
+                </button>
 
-    const appState = {
-        profile: null, tasks: [], categories: [], filter: 'all', viewMode: 'grid',
-        listeners: [], stats: { streak: 0 }, sortableInstance: null,
-        analyticsOpen: false, currentChartTab: 'category',
-        charts: {}
-    };
+                <div class="pt-6">
+                    <div class="flex items-center justify-between px-2 mb-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase">קטגוריות</p>
+                        <button onclick="app.openCategoryModal()" class="text-indigo-500"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </div>
+                    <div id="sidebar-categories" class="space-y-1"></div>
+                </div>
 
-    // ============================================================
-    // ANALYTICS ENGINE
-    // ============================================================
-    const analytics = {
-        isDark() { return document.documentElement.classList.contains('dark'); },
+                <div class="pt-10 border-t dark:border-slate-700 mt-6">
+                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2 text-right">גיבוי ונתונים</p>
+                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
+                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
+                </div>
+            </nav>
+            <div class="p-4"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
+        </aside>
 
-        getChartDefaults() {
-            return {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                animation: { duration: 600, easing: 'easeOutQuart' }
-            };
-        },
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="app.toggleSidebar()"></div>
 
-        buildCategoryData() {
-            const cats = appState.categories;
-            const labels = cats.map(c => c.name);
-            const colors = cats.map(c => c.color);
-            const total = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id).length);
-            const done = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id && t.completed).length);
-            const pending = total.map((t, i) => t - done[i]);
-            return { labels, colors, total, done, pending };
-        },
+        <main class="flex-1 flex flex-col relative overflow-hidden">
+            <header class="h-20 glass flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
+                <div class="flex items-center gap-3 flex-1 max-w-xl">
+                    <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white p-2"><i class="fa-solid fa-bars-staggered"></i></button>
+                    <div class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl px-4">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" oninput="app.renderTasks()" placeholder="חיפוש..." class="w-full bg-transparent border-none py-2.5 outline-none dark:text-white">
+                        <div class="flex items-center border-r border-slate-300 pr-2 mr-2">
+                            <i class="fa-solid fa-calendar-day text-slate-400 text-sm ml-2"></i>
+                            <input type="date" id="date-filter" oninput="app.renderTasks()" class="bg-transparent border-none text-xs outline-none dark:text-white cursor-pointer w-24">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Analytics Toggle Button -->
+                    <button onclick="app.toggleAnalytics()" id="btn-analytics" class="w-9 h-9 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-indigo-600 relative" title="ניתוח נתונים">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span id="analytics-dot" class="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full hidden"></span>
+                    </button>
+                    <div class="hidden sm:flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl ml-2">
+                        <button onclick="app.setViewMode('grid')" id="btn-grid" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm"><i class="fa-solid fa-grip"></i></button>
+                        <button onclick="app.setViewMode('list')" id="btn-list" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400"><i class="fa-solid fa-list-ul"></i></button>
+                    </div>
+                    <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all select-none">+ חדש</button>
+                </div>
+            </header>
 
-        buildPriorityData() {
-            const pDefs = [
-                { label: 'דחוף מאוד 🔴', color: '#ef4444', val: 1 },
-                { label: 'עדיפות גבוהה 🟠', color: '#f97316', val: 2 },
-                { label: 'רגילה 🔵', color: '#3b82f6', val: 3 }
-            ];
-            const counts = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val).length);
-            const done = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val && t.completed).length);
-            return { labels: pDefs.map(p => p.label), colors: pDefs.map(p => p.color), counts, done };
-        },
+            <div id="main-content-scroll" class="px-4 md:px-8 py-6">
 
-        destroyChart(key) {
-            if (appState.charts[key]) { appState.charts[key].destroy(); delete appState.charts[key]; }
-        },
+                <!-- Stats Row -->
+                <div class="grid grid-cols-3 gap-3 md:gap-6 mb-6 text-right">
+                    <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-500 transition-all">
+                        <p class="text-slate-400 text-[10px] uppercase mb-1">סה"כ</p>
+                        <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
+                    </button>
+                    <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-500 hover:bg-orange-50 transition-all">
+                        <p class="text-slate-400 text-[10px] uppercase mb-1">פעיל</p>
+                        <h3 id="stat-active" class="text-2xl font-bold dark:text-white">0</h3>
+                    </button>
+                    <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-500 hover:bg-green-50 transition-all">
+                        <p class="text-slate-400 text-[10px] uppercase mb-1">בוצע</p>
+                        <h3 id="stat-completed" class="text-2xl font-bold dark:text-white">0</h3>
+                    </button>
+                </div>
 
-        renderAll() {
-            this.renderCategoryCharts();
-            this.renderPriorityCharts();
-            this.renderProgressCharts();
-        },
+                <!-- ===== ANALYTICS PANEL ===== -->
+                <div id="analytics-panel" class="hidden mb-8 analytics-animate">
+                    <!-- Tabs -->
+                    <div class="flex gap-6 border-b dark:border-slate-700 mb-5 text-sm text-slate-500 dark:text-slate-400">
+                        <button onclick="app.setChartTab('category')" id="tab-category" class="chart-tab active pb-3 px-1">פי קטגוריה</button>
+                        <button onclick="app.setChartTab('priority')" id="tab-priority" class="chart-tab pb-3 px-1">פי עדיפות</button>
+                        <button onclick="app.setChartTab('progress')" id="tab-progress" class="chart-tab pb-3 px-1">התקדמות</button>
+                    </div>
 
-        renderCategoryCharts() {
-            const d = this.buildCategoryData();
-            const defaults = this.getChartDefaults();
-            const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-            const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+                    <!-- Tab: Category Charts -->
+                    <div id="chart-view-category" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">משימות לפי קטגוריה — עמודות</h4>
+                            <div class="chart-wrapper"><canvas id="chart-bar-category"></canvas></div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח קטגוריות — עוגה</h4>
+                            <div class="chart-wrapper"><canvas id="chart-pie-category"></canvas></div>
+                        </div>
+                        <!-- Legend -->
+                        <div class="analytics-card md:col-span-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 text-right">פירוט קטגוריות</h4>
+                            <div id="category-detail-legend" class="space-y-1"></div>
+                        </div>
+                    </div>
 
-            this.destroyChart('barCat');
-            const ctxBar = document.getElementById('chart-bar-category');
-            if (ctxBar) {
-                appState.charts['barCat'] = new Chart(ctxBar, {
-                    type: 'bar',
-                    data: {
-                        labels: d.labels,
-                        datasets: [
-                            { label: 'ממתין', data: d.pending, backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
-                            { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
-                        ]
-                    },
-                    options: {
-                        ...defaults,
-                        plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                        scales: {
-                            x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
-                            y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
+                    <!-- Tab: Priority Charts -->
+                    <div id="chart-view-priority" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח לפי עדיפות — עמודות</h4>
+                            <div class="chart-wrapper"><canvas id="chart-bar-priority"></canvas></div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח עדיפות — עוגה</h4>
+                            <div class="chart-wrapper"><canvas id="chart-pie-priority"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Progress -->
+                    <div id="chart-view-progress" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">סטטוס השלמה לפי קטגוריה</h4>
+                            <div class="chart-wrapper"><canvas id="chart-bar-progress"></canvas></div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">אחוזי השלמה לפי קטגוריה</h4>
+                            <div id="progress-bars-list" class="space-y-3 py-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ===== END ANALYTICS PANEL ===== -->
+
+                <div id="tasks-container"></div>
+                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i><p class="text-xl">אין משימות להצגה</p></div>
+            </div>
+
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30 shadow-lg">
+                <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
+                <button onclick="app.openWeeklySummary()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-trophy"></i><span class="text-[10px]">סיכום</span></button>
+                <div class="w-10"></div>
+                <button onclick="app.toggleAnalytics()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-chart-pie"></i><span class="text-[10px]">גרפים</span></button>
+                <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
+            </nav>
+            <button onclick="app.openTaskModal()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl z-40 active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i></button>
+        </main>
+    </div>
+
+    <!-- Weekly Modal -->
+    <div id="weekly-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onclick="app.closeWeeklySummary()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 text-right shadow-2xl">
+            <h2 class="text-2xl font-bold dark:text-white heading mb-6 text-center">הסיכום השבועי</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
+                    <p class="text-xs text-slate-400">הושלמו</p>
+                    <h4 id="weekly-count" class="text-3xl font-black text-indigo-600">0</h4>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
+                    <p class="text-xs text-slate-400">רצף (Streak)</p>
+                    <h4 id="weekly-streak" class="text-3xl font-black text-orange-500">0</h4>
+                </div>
+            </div>
+            <div id="today-suggestions" class="space-y-2 mb-8"></div>
+            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">סגור</button>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right">
+            <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה</h3>
+                <button type="button" onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
+                <input type="hidden" id="task-id">
+                <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
+                <textarea id="task-desc" placeholder="פירוט המשימה (אופציונלי)..." rows="3" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="task-category" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none cursor-pointer"></select>
+                    <select id="task-priority" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
+                        <option value="1">🔴 דחוף מאוד</option>
+                        <option value="2">🟠 עדיפות גבוהה</option>
+                        <option value="3" selected>🔵 רגילה</option>
+                    </select>
+                </div>
+                <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
+                <button type="submit" id="btn-save-task" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">שמור שינויים</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 relative z-10 text-right shadow-2xl">
+            <h3 class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
+            <input type="hidden" id="edit-cat-id">
+            <div class="space-y-4">
+                <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
+                <input type="color" id="cat-color-picker" class="w-full h-12 rounded-xl bg-transparent border-none cursor-pointer">
+                <button onclick="app.saveCategory()" type="button" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">שמור</button>
+                <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnTW2iN51IrUxinwojc4BGEzn5gQSDKBI",
+            authDomain: "task-manager-109e0.firebaseapp.com",
+            projectId: "task-manager-109e0",
+            storageBucket: "task-manager-109e0.firebasestorage.app",
+            messagingSenderId: "489374964203",
+            appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae",
+        };
+
+        const fApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fApp);
+        const auth = getAuth(fApp);
+        const artifactId = 'task-manager-109e0';
+
+        const appState = {
+            profile: null, tasks: [], categories: [], filter: 'all', viewMode: 'grid',
+            listeners: [], stats: { streak: 0 }, sortableInstance: null,
+            analyticsOpen: false, currentChartTab: 'category',
+            charts: {}
+        };
+
+        // ============================================================
+        // ANALYTICS ENGINE
+        // ============================================================
+        const analytics = {
+            isDark() { return document.documentElement.classList.contains('dark'); },
+
+            getChartDefaults() {
+                return {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    animation: { duration: 600, easing: 'easeOutQuart' }
+                };
+            },
+
+            buildCategoryData() {
+                const cats = appState.categories;
+                const labels = cats.map(c => c.name);
+                const colors = cats.map(c => c.color);
+                const total = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id).length);
+                const done = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id && t.completed).length);
+                const pending = total.map((t, i) => t - done[i]);
+                return { labels, colors, total, done, pending };
+            },
+
+            buildPriorityData() {
+                const pDefs = [
+                    { label: 'דחוף מאוד 🔴', color: '#ef4444', val: 1 },
+                    { label: 'עדיפות גבוהה 🟠', color: '#f97316', val: 2 },
+                    { label: 'רגילה 🔵', color: '#3b82f6', val: 3 }
+                ];
+                const counts = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val).length);
+                const done = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val && t.completed).length);
+                return { labels: pDefs.map(p => p.label), colors: pDefs.map(p => p.color), counts, done };
+            },
+
+            destroyChart(key) {
+                if (appState.charts[key]) { appState.charts[key].destroy(); delete appState.charts[key]; }
+            },
+
+            renderAll() {
+                this.renderCategoryCharts();
+                this.renderPriorityCharts();
+                this.renderProgressCharts();
+            },
+
+            renderCategoryCharts() {
+                const d = this.buildCategoryData();
+                const defaults = this.getChartDefaults();
+                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
+                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+                this.destroyChart('barCat');
+                const ctxBar = document.getElementById('chart-bar-category');
+                if (ctxBar) {
+                    appState.charts['barCat'] = new Chart(ctxBar, {
+                        type: 'bar',
+                        data: {
+                            labels: d.labels,
+                            datasets: [
+                                { label: 'ממתין', data: d.pending, backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
+                                { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
+                            ]
+                        },
+                        options: {
+                            ...defaults,
+                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
+                            scales: {
+                                x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
+                                y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
 
-            this.destroyChart('pieCat');
-            const ctxPie = document.getElementById('chart-pie-category');
-            if (ctxPie) {
-                appState.charts['pieCat'] = new Chart(ctxPie, {
-                    type: 'doughnut',
-                    data: {
-                        labels: d.labels,
-                        datasets: [{ data: d.total, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
-                    },
-                    options: {
-                        ...defaults,
-                        cutout: '65%',
-                        plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
-                    }
-                });
-            }
+                this.destroyChart('pieCat');
+                const ctxPie = document.getElementById('chart-pie-category');
+                if (ctxPie) {
+                    appState.charts['pieCat'] = new Chart(ctxPie, {
+                        type: 'doughnut',
+                        data: {
+                            labels: d.labels,
+                            datasets: [{ data: d.total, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
+                        },
+                        options: {
+                            ...defaults,
+                            cutout: '65%',
+                            plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
+                        }
+                    });
+                }
 
-            // Detail Legend
-            const legend = document.getElementById('category-detail-legend');
-            if (legend) {
-                legend.innerHTML = d.labels.map((label, i) => {
-                    const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
-                    return `
-                        <div class="category-legend-item">
-                            <div class="flex items-center gap-3 flex-1">
-                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${d.colors[i]}"></span>
-                                <span class="text-sm font-medium dark:text-white">${label}</span>
-                            </div>
-                            <div class="flex items-center gap-4 text-xs text-slate-400">
-                                <span>${d.done[i]}/${d.total[i]}</span>
-                                <div class="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                // Detail Legend
+                const legend = document.getElementById('category-detail-legend');
+                if (legend) {
+                    legend.innerHTML = d.labels.map((label, i) => {
+                        const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
+                        return `
+                            <div class="category-legend-item">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${d.colors[i]}"></span>
+                                    <span class="text-sm font-medium dark:text-white">${label}</span>
+                                </div>
+                                <div class="flex items-center gap-4 text-xs text-slate-400">
+                                    <span>${d.done[i]}/${d.total[i]}</span>
+                                    <div class="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                                        <div class="progress-bar-fill rounded-full" style="width:${pct}%; background:${d.colors[i]}"></div>
+                                    </div>
+                                    <span class="font-bold w-8 text-left" style="color:${d.colors[i]}">${pct}%</span>
+                                </div>
+                            </div>`;
+                    }).join('');
+                }
+            },
+
+            renderPriorityCharts() {
+                const d = this.buildPriorityData();
+                const defaults = this.getChartDefaults();
+                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
+                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+                this.destroyChart('barPri');
+                const ctxBar = document.getElementById('chart-bar-priority');
+                if (ctxBar) {
+                    appState.charts['barPri'] = new Chart(ctxBar, {
+                        type: 'bar',
+                        data: {
+                            labels: d.labels,
+                            datasets: [
+                                { label: 'פעיל', data: d.counts.map((c, i) => c - d.done[i]), backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
+                                { label: 'בוצע', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
+                            ]
+                        },
+                        options: {
+                            ...defaults,
+                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
+                            scales: {
+                                x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik', size: 10 } }, grid: { color: gridColor } },
+                                y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+
+                this.destroyChart('piePri');
+                const ctxPie = document.getElementById('chart-pie-priority');
+                if (ctxPie) {
+                    appState.charts['piePri'] = new Chart(ctxPie, {
+                        type: 'pie',
+                        data: {
+                            labels: d.labels,
+                            datasets: [{ data: d.counts, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
+                        },
+                        options: {
+                            ...defaults,
+                            plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
+                        }
+                    });
+                }
+            },
+
+            renderProgressCharts() {
+                const d = this.buildCategoryData();
+                const defaults = this.getChartDefaults();
+                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
+                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+                this.destroyChart('barProg');
+                const ctxBar = document.getElementById('chart-bar-progress');
+                if (ctxBar) {
+                    appState.charts['barProg'] = new Chart(ctxBar, {
+                        type: 'bar',
+                        data: {
+                            labels: d.labels,
+                            datasets: [
+                                { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + 'dd'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false },
+                                { label: 'נותר', data: d.pending, backgroundColor: d.colors.map(c => c + '33'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false }
+                            ]
+                        },
+                        options: {
+                            ...defaults,
+                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
+                            scales: {
+                                x: { ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
+                                y: { ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+
+                // Progress bars
+                const pbList = document.getElementById('progress-bars-list');
+                if (pbList) {
+                    pbList.innerHTML = d.labels.map((label, i) => {
+                        const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
+                        return `
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background:${d.colors[i]}"></span>
+                                        <span class="text-xs font-medium dark:text-white">${label}</span>
+                                    </div>
+                                    <span class="text-xs font-bold" style="color:${d.colors[i]}">${pct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                                     <div class="progress-bar-fill rounded-full" style="width:${pct}%; background:${d.colors[i]}"></div>
                                 </div>
-                                <span class="font-bold w-8 text-left" style="color:${d.colors[i]}">${pct}%</span>
-                            </div>
-                        </div>`;
-                }).join('');
-            }
-        },
-
-        renderPriorityCharts() {
-            const d = this.buildPriorityData();
-            const defaults = this.getChartDefaults();
-            const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-            const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
-            this.destroyChart('barPri');
-            const ctxBar = document.getElementById('chart-bar-priority');
-            if (ctxBar) {
-                appState.charts['barPri'] = new Chart(ctxBar, {
-                    type: 'bar',
-                    data: {
-                        labels: d.labels,
-                        datasets: [
-                            { label: 'פעיל', data: d.counts.map((c, i) => c - d.done[i]), backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
-                            { label: 'בוצע', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
-                        ]
-                    },
-                    options: {
-                        ...defaults,
-                        plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                        scales: {
-                            x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik', size: 10 } }, grid: { color: gridColor } },
-                            y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
-                        }
-                    }
-                });
-            }
-
-            this.destroyChart('piePri');
-            const ctxPie = document.getElementById('chart-pie-priority');
-            if (ctxPie) {
-                appState.charts['piePri'] = new Chart(ctxPie, {
-                    type: 'pie',
-                    data: {
-                        labels: d.labels,
-                        datasets: [{ data: d.counts, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
-                    },
-                    options: {
-                        ...defaults,
-                        plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
-                    }
-                });
-            }
-        },
-
-        renderProgressCharts() {
-            const d = this.buildCategoryData();
-            const defaults = this.getChartDefaults();
-            const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-            const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
-            this.destroyChart('barProg');
-            const ctxBar = document.getElementById('chart-bar-progress');
-            if (ctxBar) {
-                appState.charts['barProg'] = new Chart(ctxBar, {
-                    type: 'bar',
-                    data: {
-                        labels: d.labels,
-                        datasets: [
-                            { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + 'dd'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false },
-                            { label: 'נותר', data: d.pending, backgroundColor: d.colors.map(c => c + '33'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false }
-                        ]
-                    },
-                    options: {
-                        ...defaults,
-                        plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                        scales: {
-                            x: { ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
-                            y: { ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
-                        }
-                    }
-                });
-            }
-
-            // Progress bars
-            const pbList = document.getElementById('progress-bars-list');
-            if (pbList) {
-                pbList.innerHTML = d.labels.map((label, i) => {
-                    const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
-                    return `
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full" style="background:${d.colors[i]}"></span>
-                                    <span class="text-xs font-medium dark:text-white">${label}</span>
-                                </div>
-                                <span class="text-xs font-bold" style="color:${d.colors[i]}">${pct}%</span>
-                            </div>
-                            <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                                <div class="progress-bar-fill rounded-full" style="width:${pct}%; background:${d.colors[i]}"></div>
-                            </div>
-                            <p class="text-[10px] text-slate-400 mt-1 text-left">${d.done[i]} מתוך ${d.total[i]} משימות</p>
-                        </div>`;
-                }).join('');
-            }
-        }
-    };
-
-    // ============================================================
-    // MAIN APP
-    // ============================================================
-    const app = {
-        async loginAs(profile) {
-            appState.profile = profile;
-            localStorage.setItem('tm_last_profile', profile);
-            try {
-                await signInAnonymously(auth);
-                document.getElementById('auth-overlay').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                this.updateProfileUI(profile);
-                this.startSync();
-                this.loadStreak();
-            } catch (e) { Swal.fire('שגיאה', 'חיבור Firebase נכשל.', 'error'); }
-        },
-
-        updateProfileUI(p) {
-            const isUser = p === 'user', av = document.getElementById('user-avatar');
-            av.className = `w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
-            av.innerHTML = isUser ? '<i class="fa-solid fa-user-tie"></i>' : '<i class="fa-solid fa-user-astronaut"></i>';
-            document.getElementById('user-display-name').innerText = isUser ? "שובל" : "חני";
-        },
-
-        startSync() {
-            appState.listeners.forEach(unsub => unsub());
-            const base = `artifacts/${artifactId}/users/${appState.profile}`;
-            appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
-                appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (appState.categories.length === 0) this.seedInitialCategories();
-                this.renderSidebarCategories();
-                this.renderTasks();
-                if (appState.analyticsOpen) analytics.renderAll();
-            }));
-            appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), async snap => {
-                appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (appState.tasks.length === 0) await this.runOnboarding();
-                this.renderStats();
-                this.renderTasks();
-                if (appState.analyticsOpen) analytics.renderAll();
-                // Show analytics dot if there's data
-                document.getElementById('analytics-dot').classList.toggle('hidden', appState.tasks.length === 0);
-            }));
-        },
-
-        // ---- Analytics ----
-        toggleAnalytics() {
-            appState.analyticsOpen = !appState.analyticsOpen;
-            const panel = document.getElementById('analytics-panel');
-            const btn = document.getElementById('btn-analytics');
-            if (appState.analyticsOpen) {
-                panel.classList.remove('hidden');
-                panel.classList.add('analytics-animate');
-                btn.classList.add('bg-indigo-100', 'text-indigo-600');
-                btn.classList.remove('text-slate-400');
-                // Small delay to let DOM render canvases
-                setTimeout(() => analytics.renderAll(), 50);
-            } else {
-                panel.classList.add('hidden');
-                btn.classList.remove('bg-indigo-100', 'text-indigo-600');
-                btn.classList.add('text-slate-400');
-            }
-        },
-
-        setChartTab(tab) {
-            appState.currentChartTab = tab;
-            ['category', 'priority', 'progress'].forEach(t => {
-                document.getElementById(`chart-view-${t}`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
-            });
-            // Re-render charts for the active tab
-            setTimeout(() => {
-                if (tab === 'category') analytics.renderCategoryCharts();
-                if (tab === 'priority') analytics.renderPriorityCharts();
-                if (tab === 'progress') analytics.renderProgressCharts();
-            }, 30);
-        },
-
-        // ---- Tasks ----
-        async saveTask(e) {
-            if (e) e.preventDefault();
-            const btn = document.getElementById('btn-save-task');
-            btn.disabled = true; btn.innerText = "שומר...";
-            try {
-                const id = document.getElementById('task-id').value;
-                const data = {
-                    title: document.getElementById('task-title').value.trim(),
-                    description: document.getElementById('task-desc').value.trim(),
-                    categoryId: document.getElementById('task-category').value,
-                    priority: parseInt(document.getElementById('task-priority').value),
-                    dueDate: document.getElementById('task-date').value,
-                    updatedAt: Date.now()
-                };
-                const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                if (id) await updateDoc(doc(db, path, id), data);
-                else await addDoc(collection(db, path), { ...data, completed: false, createdAt: Date.now(), order: appState.tasks.length });
-                this.closeTaskModal();
-            } catch (err) { Swal.fire('שגיאה', 'שמירה נכשלה.', 'error'); }
-            finally { btn.disabled = false; btn.innerText = "שמור שינויים"; }
-        },
-
-        renderTasks() {
-            const container = document.getElementById('tasks-container');
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const dateFilter = document.getElementById('date-filter').value;
-            container.innerHTML = '';
-            const now = new Date().setHours(0,0,0,0);
-
-            const filtered = appState.tasks.filter(t => {
-                const matchSearch = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
-                const matchDate = !dateFilter || t.dueDate === dateFilter;
-                if (appState.filter === 'active') return matchSearch && matchDate && !t.completed;
-                if (appState.filter === 'completed') return matchSearch && matchDate && t.completed;
-                if (appState.filter !== 'all') return matchSearch && matchDate && t.categoryId === appState.filter;
-                return matchSearch && matchDate;
-            }).sort((a,b) => {
-                const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-                const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-                if (dateA !== dateB) return dateA - dateB;
-                return (a.order || 0) - (b.order || 0);
-            });
-
-            document.getElementById('empty-state').classList.toggle('hidden', filtered.length > 0);
-            container.className = appState.viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-3 max-w-4xl mx-auto';
-
-            filtered.forEach(task => {
-                const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'כללי', color: '#ccc' };
-                const isOverdue = task.dueDate && new Date(task.dueDate) < now && !task.completed;
-                const p = task.priority || 3;
-                const pConfig = {
-                    1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200 ring-1 ring-red-400' },
-                    2: { text: 'עדיפות גבוהה', icon: 'fa-arrow-up', class: 'text-orange-700 bg-orange-200' },
-                    3: { text: 'רגילה', icon: 'fa-minus', class: 'text-blue-700 bg-blue-200' }
-                }[p];
-
-                const card = document.createElement('div');
-                card.dataset.id = task.id;
-                card.className = `task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card' : ''}`;
-                const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL', {day:'numeric', month:'short'}) : 'ללא יעד';
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-3">
-                            <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white shadow-glow' : 'border-slate-300 dark:border-slate-600'}">
-                                ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-                            </div>
-                            <div class="grab-handle text-slate-400 dark:text-slate-500"><i class="fa-solid fa-grip-vertical"></i></div>
-                        </div>
-                        <div class="flex gap-3 text-slate-300">
-                            <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
-                            <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash-can text-sm"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${cat.name}</span></div>
-                        <span class="text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase ${pConfig.class}">
-                            <i class="fa-solid ${pConfig.icon}"></i> ${pConfig.text}
-                        </span>
-                    </div>
-                    <h4 class="font-bold text-lg dark:text-white leading-tight ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
-                    ${task.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-white/40 dark:bg-black/10 p-2 rounded-xl border border-slate-100 dark:border-slate-700/50">${task.description}</p>` : ''}
-                    <p class="text-[11px] mt-4 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
-                        <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar-check'}"></i> ${dateStr} ${isOverdue ? '(בפיגור!)' : ''}
-                    </p>
-                `;
-                container.appendChild(card);
-            });
-            this.initSortable();
-        },
-
-        async performImport(data, shouldClear) {
-            Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            try {
-                const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                if (shouldClear) {
-                    const snap = await getDocs(collection(db, path));
-                    for (const d of snap.docs) await deleteDoc(d.ref);
+                                <p class="text-[10px] text-slate-400 mt-1 text-left">${d.done[i]} מתוך ${d.total[i]} משימות</p>
+                            </div>`;
+                    }).join('');
                 }
-                const tasks = data.tasks || [];
-                for (let i = 0; i < tasks.length; i += 500) {
-                    const batch = writeBatch(db);
-                    tasks.slice(i, i + 500).forEach((t, idx) => {
-                        const nt = {...t}; delete nt.id;
-                        batch.set(doc(collection(db, path)), { ...nt, order: idx });
-                    });
-                    await batch.commit();
-                }
-                Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
-            } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
-        },
-
-        initSortable() {
-            const el = document.getElementById('tasks-container');
-            if (appState.sortableInstance) appState.sortableInstance.destroy();
-            appState.sortableInstance = new Sortable(el, {
-                handle: '.grab-handle', animation: 200, ghostClass: 'sortable-ghost',
-                onEnd: async () => {
-                    const items = Array.from(el.children);
-                    const batch = writeBatch(db);
-                    items.forEach((item, index) => {
-                        const ref = doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, item.dataset.id);
-                        batch.update(ref, { order: index });
-                    });
-                    await batch.commit();
-                }
-            });
-        },
-
-        async toggleComplete(id, current) {
-            if (!current) { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); this.updateStreak(); }
-            await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), { completed: !current });
-        },
-
-        async updateStreak() {
-            const streakRef = doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity');
-            const snap = await getDoc(streakRef);
-            const now = new Date().setHours(0,0,0,0);
-            let streak = 1;
-            if (snap.exists()) {
-                const last = snap.data().lastCompletionDate;
-                if (last === now) return;
-                if (last === now - 86400000) streak = (snap.data().streak || 0) + 1;
             }
-            await setDoc(streakRef, { streak, lastCompletionDate: now }, { merge: true });
-            appState.stats.streak = streak;
-            document.getElementById('streak-counter').innerText = `🔥 ${streak} ימים`;
-        },
-
-        async loadStreak() {
-            const snap = await getDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity'));
-            if (snap.exists()) {
-                appState.stats.streak = snap.data().streak || 0;
-                document.getElementById('streak-counter').innerText = `🔥 ${appState.stats.streak} ימים`;
-            }
-        },
-
-        openWeeklySummary() {
-            const weekAgo = Date.now() - (7 * 86400000);
-            const weekly = appState.tasks.filter(t => t.completed && (t.updatedAt || Date.now()) > weekAgo);
-            document.getElementById('weekly-count').innerText = weekly.length;
-            document.getElementById('weekly-streak').innerText = appState.stats.streak;
-            const sug = appState.tasks.filter(t => !t.completed).sort((a,b) => (a.dueDate || '9999') > (b.dueDate || '9999') ? 1 : -1).slice(0, 3);
-            document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
-            document.getElementById('weekly-modal').classList.remove('hidden');
-        },
-
-        async runOnboarding() {
-            const batch = writeBatch(db);
-            const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-            [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
-             { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
-            .forEach(s => batch.set(doc(collection(db, base)), s));
-            await batch.commit();
-        },
-
-        async seedInitialCategories() {
-            const batch = writeBatch(db);
-            [{ name: 'כללי', color: '#6366f1' }, { name: 'בית', color: '#10b981' }].forEach(c => batch.set(doc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/categories`)), c));
-            await batch.commit();
-        },
-
-        closeWeeklySummary() { document.getElementById('weekly-modal').classList.add('hidden'); },
-
-        async deleteTask(id) {
-            const res = await Swal.fire({ title: 'למחוק?', icon: 'warning', showCancelButton: true });
-            if (res.isConfirmed) await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id));
-        },
-
-        renderSidebarCategories() {
-            const container = document.getElementById('sidebar-categories');
-            container.innerHTML = '';
-            appState.categories.forEach(cat => {
-                const btn = document.createElement('div');
-                btn.className = `group flex items-center justify-between px-4 py-2.5 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav shadow-md' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`;
-                btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
-                btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
-                container.appendChild(btn);
-            });
-            document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        },
-
-        async saveCategory() {
-            const id = document.getElementById('edit-cat-id').value, name = document.getElementById('cat-name-input').value.trim(), color = document.getElementById('cat-color-picker').value;
-            if (!name) return;
-            const path = `artifacts/${artifactId}/users/${appState.profile}/categories`;
-            if (id) await updateDoc(doc(db, path, id), { name, color });
-            else await addDoc(collection(db, path), { name, color });
-            this.closeCategoryModal();
-        },
-
-        async deleteCategory() {
-            const id = document.getElementById('edit-cat-id').value;
-            const res = await Swal.fire({ title: 'מחיקה?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
-            if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
-        },
-
-        setViewMode(mode) {
-            appState.viewMode = mode;
-            document.getElementById('btn-grid').className = mode === 'grid' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
-            document.getElementById('btn-list').className = mode === 'list' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
-            this.renderTasks();
-        },
-
-        openTaskModal(tid = null) {
-            document.getElementById('task-modal').classList.remove('hidden');
-            if (tid) {
-                const t = appState.tasks.find(x => x.id === tid);
-                document.getElementById('task-id').value = t.id;
-                document.getElementById('task-title').value = t.title;
-                document.getElementById('task-desc').value = t.description;
-                document.getElementById('task-priority').value = t.priority;
-                document.getElementById('task-category').value = t.categoryId;
-                document.getElementById('task-date').value = t.dueDate || '';
-            } else { document.getElementById('task-form').reset(); document.getElementById('task-id').value = ''; }
-        },
-        closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
-
-        openCategoryModal(cid = null) {
-            document.getElementById('category-modal').classList.remove('hidden');
-            if (cid) {
-                const c = appState.categories.find(x => x.id === cid);
-                document.getElementById('edit-cat-id').value = c.id;
-                document.getElementById('cat-name-input').value = c.name;
-                document.getElementById('cat-color-picker').value = c.color;
-                document.getElementById('btn-delete-cat').classList.remove('hidden');
-            } else {
-                document.getElementById('cat-name-input').value = '';
-                document.getElementById('edit-cat-id').value = '';
-                document.getElementById('cat-color-picker').value = '#6366f1';
-                document.getElementById('btn-delete-cat').classList.add('hidden');
-            }
-        },
-        closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
-
-        setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); },
-        toggleTheme() { document.documentElement.classList.toggle('dark'); if(appState.analyticsOpen) setTimeout(() => analytics.renderAll(), 100); },
-        toggleSidebar() { document.getElementById('sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); },
-
-        renderStats() {
-            const t = appState.tasks.length, c = appState.tasks.filter(x => x.completed).length;
-            document.getElementById('stat-total').innerText = t;
-            document.getElementById('stat-active').innerText = t - c;
-            document.getElementById('stat-completed').innerText = c;
-        },
-
-        exportTasks() {
-            const b = new Blob([JSON.stringify({ tasks: appState.tasks, categories: appState.categories })], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup.json`; a.click();
-        },
-        logout() { localStorage.removeItem('tm_last_profile'); location.reload(); }
-    };
-
-    window.app = app;
-    const saved = localStorage.getItem('tm_last_profile');
-    if (saved) app.loginAs(saved);
-
-    document.getElementById('json-file-input').onchange = (e) => {
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const data = JSON.parse(ev.target.result);
-            const res = await Swal.fire({ title: 'ייבוא גיבוי', text: 'למזג או להחליף?', showCancelButton: true });
-            app.performImport(data, res.isConfirmed);
         };
-        reader.readAsText(e.target.files[0]);
-    };
-</script>
-```
 
+        // ============================================================
+        // MAIN APP
+        // ============================================================
+        const app = {
+            async loginAs(profile) {
+                appState.profile = profile;
+                localStorage.setItem('tm_last_profile', profile);
+                try {
+                    await signInAnonymously(auth);
+                    document.getElementById('auth-overlay').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    this.updateProfileUI(profile);
+                    this.startSync();
+                    this.loadStreak();
+                } catch (e) { Swal.fire('שגיאה', 'חיבור Firebase נכשל.', 'error'); }
+            },
+
+            updateProfileUI(p) {
+                const isUser = p === 'user', av = document.getElementById('user-avatar');
+                av.className = `w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
+                av.innerHTML = isUser ? '<i class="fa-solid fa-user-tie"></i>' : '<i class="fa-solid fa-user-astronaut"></i>';
+                document.getElementById('user-display-name').innerText = isUser ? "שובל" : "חני";
+            },
+
+            startSync() {
+                appState.listeners.forEach(unsub => unsub());
+                const base = `artifacts/${artifactId}/users/${appState.profile}`;
+                appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
+                    appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    if (appState.categories.length === 0) this.seedInitialCategories();
+                    this.renderSidebarCategories();
+                    this.renderTasks();
+                    if (appState.analyticsOpen) analytics.renderAll();
+                }));
+                appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), async snap => {
+                    appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    if (appState.tasks.length === 0) await this.runOnboarding();
+                    this.renderStats();
+                    this.renderTasks();
+                    if (appState.analyticsOpen) analytics.renderAll();
+                    // Show analytics dot if there's data
+                    document.getElementById('analytics-dot').classList.toggle('hidden', appState.tasks.length === 0);
+                }));
+            },
+
+            // ---- Analytics ----
+            toggleAnalytics() {
+                appState.analyticsOpen = !appState.analyticsOpen;
+                const panel = document.getElementById('analytics-panel');
+                const btn = document.getElementById('btn-analytics');
+                if (appState.analyticsOpen) {
+                    panel.classList.remove('hidden');
+                    panel.classList.add('analytics-animate');
+                    btn.classList.add('bg-indigo-100', 'text-indigo-600');
+                    btn.classList.remove('text-slate-400');
+                    // Small delay to let DOM render canvases
+                    setTimeout(() => analytics.renderAll(), 50);
+                } else {
+                    panel.classList.add('hidden');
+                    btn.classList.remove('bg-indigo-100', 'text-indigo-600');
+                    btn.classList.add('text-slate-400');
+                }
+            },
+
+            setChartTab(tab) {
+                appState.currentChartTab = tab;
+                ['category', 'priority', 'progress'].forEach(t => {
+                    document.getElementById(`chart-view-${t}`).classList.toggle('hidden', t !== tab);
+                    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+                });
+                // Re-render charts for the active tab
+                setTimeout(() => {
+                    if (tab === 'category') analytics.renderCategoryCharts();
+                    if (tab === 'priority') analytics.renderPriorityCharts();
+                    if (tab === 'progress') analytics.renderProgressCharts();
+                }, 30);
+            },
+
+            // ---- Tasks ----
+            async saveTask(e) {
+                if (e) e.preventDefault();
+                const btn = document.getElementById('btn-save-task');
+                btn.disabled = true; btn.innerText = "שומר...";
+                try {
+                    const id = document.getElementById('task-id').value;
+                    const data = {
+                        title: document.getElementById('task-title').value.trim(),
+                        description: document.getElementById('task-desc').value.trim(),
+                        categoryId: document.getElementById('task-category').value,
+                        priority: parseInt(document.getElementById('task-priority').value),
+                        dueDate: document.getElementById('task-date').value,
+                        updatedAt: Date.now()
+                    };
+                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if (id) await updateDoc(doc(db, path, id), data);
+                    else await addDoc(collection(db, path), { ...data, completed: false, createdAt: Date.now(), order: appState.tasks.length });
+                    this.closeTaskModal();
+                } catch (err) { Swal.fire('שגיאה', 'שמירה נכשלה.', 'error'); }
+                finally { btn.disabled = false; btn.innerText = "שמור שינויים"; }
+            },
+
+            renderTasks() {
+                const container = document.getElementById('tasks-container');
+                const search = document.getElementById('search-input').value.toLowerCase();
+                const dateFilter = document.getElementById('date-filter').value;
+                container.innerHTML = '';
+                const now = new Date().setHours(0,0,0,0);
+
+                const filtered = appState.tasks.filter(t => {
+                    const matchSearch = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
+                    const matchDate = !dateFilter || t.dueDate === dateFilter;
+                    if (appState.filter === 'active') return matchSearch && matchDate && !t.completed;
+                    if (appState.filter === 'completed') return matchSearch && matchDate && t.completed;
+                    if (appState.filter !== 'all') return matchSearch && matchDate && t.categoryId === appState.filter;
+                    return matchSearch && matchDate;
+                }).sort((a,b) => {
+                    // משימות פעילות תמיד לפני שהושלמו
+                    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                    // משימות שהושלמו: האחרונה שבוצעה ראשונה
+                    if (a.completed && b.completed) {
+                        const ca = a.completedAt || a.updatedAt || 0;
+                        const cb = b.completedAt || b.updatedAt || 0;
+                        return cb - ca;
+                    }
+                    // משימות פעילות: הכי חדשות ראשון
+                    return (b.createdAt || 0) - (a.createdAt || 0);
+                });
+
+                document.getElementById('empty-state').classList.toggle('hidden', filtered.length > 0);
+                container.className = appState.viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-3 max-w-4xl mx-auto';
+
+                filtered.forEach(task => {
+                    const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'כללי', color: '#ccc' };
+                    const isOverdue = task.dueDate && new Date(task.dueDate) < now && !task.completed;
+                    const p = task.priority || 3;
+                    const pConfig = {
+                        1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200 ring-1 ring-red-400' },
+                        2: { text: 'עדיפות גבוהה', icon: 'fa-arrow-up', class: 'text-orange-700 bg-orange-200' },
+                        3: { text: 'רגילה', icon: 'fa-minus', class: 'text-blue-700 bg-blue-200' }
+                    }[p];
+
+                    const card = document.createElement('div');
+                    card.dataset.id = task.id;
+                    card.className = `task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card' : ''}`;
+                    const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL', {day:'numeric', month:'short'}) : 'ללא יעד';
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-3">
+                                <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white shadow-glow' : 'border-slate-300 dark:border-slate-600'}">
+                                    ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                                </div>
+                                <div class="grab-handle text-slate-400 dark:text-slate-500"><i class="fa-solid fa-grip-vertical"></i></div>
+                            </div>
+                            <div class="flex gap-3 text-slate-300">
+                                <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${cat.name}</span></div>
+                            <span class="text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase ${pConfig.class}">
+                                <i class="fa-solid ${pConfig.icon}"></i> ${pConfig.text}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-lg dark:text-white leading-tight ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
+                        ${task.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-white/40 dark:bg-black/10 p-2 rounded-xl border border-slate-100 dark:border-slate-700/50">${task.description}</p>` : ''}
+                        <p class="text-[11px] mt-4 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
+                            <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar-check'}"></i> ${dateStr} ${isOverdue ? '(בפיגור!)' : ''}
+                        </p>
+                        ${task.completed && task.completedAt ? `<p class="text-[10px] mt-1 flex items-center gap-1 text-green-600 font-bold"><i class="fa-solid fa-circle-check"></i> בוצע: ${new Date(task.completedAt).toLocaleDateString('he-IL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</p>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+                this.initSortable();
+            },
+
+            async performImport(data, shouldClear) {
+                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if (shouldClear) {
+                        const snap = await getDocs(collection(db, path));
+                        for (const d of snap.docs) await deleteDoc(d.ref);
+                    }
+                    const tasks = data.tasks || [];
+                    for (let i = 0; i < tasks.length; i += 500) {
+                        const batch = writeBatch(db);
+                        tasks.slice(i, i + 500).forEach((t, idx) => {
+                            const nt = {...t}; delete nt.id;
+                            batch.set(doc(collection(db, path)), { ...nt, order: idx });
+                        });
+                        await batch.commit();
+                    }
+                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
+                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
+            },
+
+            initSortable() {
+                const el = document.getElementById('tasks-container');
+                if (appState.sortableInstance) appState.sortableInstance.destroy();
+                appState.sortableInstance = new Sortable(el, {
+                    handle: '.grab-handle', animation: 200, ghostClass: 'sortable-ghost',
+                    onEnd: async () => {
+                        const items = Array.from(el.children);
+                        const batch = writeBatch(db);
+                        items.forEach((item, index) => {
+                            const ref = doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, item.dataset.id);
+                            batch.update(ref, { order: index });
+                        });
+                        await batch.commit();
+                    }
+                });
+            },
+
+            async toggleComplete(id, current) {
+                if (!current) { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); this.updateStreak(); }
+                const updateData = { completed: !current };
+                if (!current) updateData.completedAt = Date.now();
+                else updateData.completedAt = null;
+                await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), updateData);
+            },
+
+            async updateStreak() {
+                const streakRef = doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity');
+                const snap = await getDoc(streakRef);
+                const now = new Date().setHours(0,0,0,0);
+                let streak = 1;
+                if (snap.exists()) {
+                    const last = snap.data().lastCompletionDate;
+                    if (last === now) return;
+                    if (last === now - 86400000) streak = (snap.data().streak || 0) + 1;
+                }
+                await setDoc(streakRef, { streak, lastCompletionDate: now }, { merge: true });
+                appState.stats.streak = streak;
+                document.getElementById('streak-counter').innerText = `🔥 ${streak} ימים`;
+            },
+
+            async loadStreak() {
+                const snap = await getDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity'));
+                if (snap.exists()) {
+                    appState.stats.streak = snap.data().streak || 0;
+                    document.getElementById('streak-counter').innerText = `🔥 ${appState.stats.streak} ימים`;
+                }
+            },
+
+            openWeeklySummary() {
+                const weekAgo = Date.now() - (7 * 86400000);
+                const weekly = appState.tasks.filter(t => t.completed && (t.updatedAt || Date.now()) > weekAgo);
+                document.getElementById('weekly-count').innerText = weekly.length;
+                document.getElementById('weekly-streak').innerText = appState.stats.streak;
+                const sug = appState.tasks.filter(t => !t.completed).sort((a,b) => (a.dueDate || '9999') > (b.dueDate || '9999') ? 1 : -1).slice(0, 3);
+                document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
+                document.getElementById('weekly-modal').classList.remove('hidden');
+            },
+
+            async runOnboarding() {
+                const batch = writeBatch(db);
+                const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
+                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
+                .forEach(s => batch.set(doc(collection(db, base)), s));
+                await batch.commit();
+            },
+
+            async seedInitialCategories() {
+                const batch = writeBatch(db);
+                [{ name: 'כללי', color: '#6366f1' }, { name: 'בית', color: '#10b981' }].forEach(c => batch.set(doc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/categories`)), c));
+                await batch.commit();
+            },
+
+            closeWeeklySummary() { document.getElementById('weekly-modal').classList.add('hidden'); },
+
+            async deleteTask(id) {
+                const res = await Swal.fire({ title: 'למחוק?', icon: 'warning', showCancelButton: true });
+                if (res.isConfirmed) await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id));
+            },
+
+            renderSidebarCategories() {
+                const container = document.getElementById('sidebar-categories');
+                container.innerHTML = '';
+                appState.categories.forEach(cat => {
+                    const btn = document.createElement('div');
+                    btn.className = `group flex items-center justify-between px-4 py-2.5 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav shadow-md' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`;
+                    btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
+                    btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
+                    container.appendChild(btn);
+                });
+                document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            },
+
+            async saveCategory() {
+                const id = document.getElementById('edit-cat-id').value, name = document.getElementById('cat-name-input').value.trim(), color = document.getElementById('cat-color-picker').value;
+                if (!name) return;
+                const path = `artifacts/${artifactId}/users/${appState.profile}/categories`;
+                if (id) await updateDoc(doc(db, path, id), { name, color });
+                else await addDoc(collection(db, path), { name, color });
+                this.closeCategoryModal();
+            },
+
+            async deleteCategory() {
+                const id = document.getElementById('edit-cat-id').value;
+                const res = await Swal.fire({ title: 'מחיקה?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
+                if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
+            },
+
+            setViewMode(mode) {
+                appState.viewMode = mode;
+                document.getElementById('btn-grid').className = mode === 'grid' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
+                document.getElementById('btn-list').className = mode === 'list' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
+                this.renderTasks();
+            },
+
+            openTaskModal(tid = null) {
+                document.getElementById('task-modal').classList.remove('hidden');
+                if (tid) {
+                    const t = appState.tasks.find(x => x.id === tid);
+                    document.getElementById('task-id').value = t.id;
+                    document.getElementById('task-title').value = t.title;
+                    document.getElementById('task-desc').value = t.description;
+                    document.getElementById('task-priority').value = t.priority;
+                    document.getElementById('task-category').value = t.categoryId;
+                    document.getElementById('task-date').value = t.dueDate || '';
+                } else { document.getElementById('task-form').reset(); document.getElementById('task-id').value = ''; }
+            },
+            closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
+
+            openCategoryModal(cid = null) {
+                document.getElementById('category-modal').classList.remove('hidden');
+                if (cid) {
+                    const c = appState.categories.find(x => x.id === cid);
+                    document.getElementById('edit-cat-id').value = c.id;
+                    document.getElementById('cat-name-input').value = c.name;
+                    document.getElementById('cat-color-picker').value = c.color;
+                    document.getElementById('btn-delete-cat').classList.remove('hidden');
+                } else {
+                    document.getElementById('cat-name-input').value = '';
+                    document.getElementById('edit-cat-id').value = '';
+                    document.getElementById('cat-color-picker').value = '#6366f1';
+                    document.getElementById('btn-delete-cat').classList.add('hidden');
+                }
+            },
+            closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
+
+            setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); },
+            toggleTheme() { document.documentElement.classList.toggle('dark'); if(appState.analyticsOpen) setTimeout(() => analytics.renderAll(), 100); },
+            toggleSidebar() { document.getElementById('sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); },
+
+            renderStats() {
+                const t = appState.tasks.length, c = appState.tasks.filter(x => x.completed).length;
+                document.getElementById('stat-total').innerText = t;
+                document.getElementById('stat-active').innerText = t - c;
+                document.getElementById('stat-completed').innerText = c;
+            },
+
+            exportTasks() {
+                const b = new Blob([JSON.stringify({ tasks: appState.tasks, categories: appState.categories })], { type: 'application/json' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup.json`; a.click();
+            },
+            logout() { localStorage.removeItem('tm_last_profile'); location.reload(); }
+        };
+
+        window.app = app;
+        const saved = localStorage.getItem('tm_last_profile');
+        if (saved) app.loginAs(saved);
+
+        document.getElementById('json-file-input').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const data = JSON.parse(ev.target.result);
+                const res = await Swal.fire({ title: 'ייבוא גיבוי', text: 'למזג או להחליף?', showCancelButton: true });
+                app.performImport(data, res.isConfirmed);
+            };
+            reader.readAsText(e.target.files[0]);
+        };
+    </script>
 </body>
 </html>
