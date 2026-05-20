@@ -4,84 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TaskMaster Pro - שובל וחני</title>
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Prata&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
-        ::-webkit-scrollbar { width: 5px; }
+        :root {
+            --accent: #6366f1;
+            --accent-soft: #eef2ff;
+            --done: #10b981;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #94a3b8;
+        }
+        .dark {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --muted: #64748b;
+            --accent-soft: #1e1b4b;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Rubik', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .heading { font-family: 'Prata', serif; }
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .dark .glass { background: rgba(30, 41, 59, 0.85); }
+
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Rubik', sans-serif; -webkit-tap-highlight-color: transparent; background: var(--bg); color: var(--text); }
+
+        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .dark .glass { background: rgba(15,23,42,0.9); }
+
         #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
-        
-        .task-card { transition: all 0.2s ease; border-right: 6px solid transparent; }
-        .priority-1 { border-right-color: #ef4444; background-color: #fef2f2; }
-        .priority-2 { border-right-color: #f97316; background-color: #fffaf5; }
-        .priority-3 { border-right-color: #3b82f6; background-color: #f8fafc; }
-        
-        .dark .priority-1 { background-color: rgba(239, 68, 68, 0.08); }
-        .dark .priority-2 { background-color: rgba(249, 115, 22, 0.08); }
-        .dark .priority-3 { background-color: rgba(59, 130, 246, 0.08); }
 
-        .overdue-card { background-color: #fef2f2 !important; border-right-color: #dc2626 !important; animation: border-pulse 2s infinite; }
-        @keyframes border-pulse { 0% { border-right-width: 6px; } 50% { border-right-width: 12px; } 100% { border-right-width: 6px; } }
+        /* ===== TASK CARDS ===== */
+        .task-card { transition: all 0.2s ease; border-right: 5px solid transparent; }
+        .priority-1 { border-right-color: #ef4444; background: #fff5f5; }
+        .priority-2 { border-right-color: #f97316; background: #fff8f0; }
+        .priority-3 { border-right-color: #6366f1; background: #fafbff; }
+        .dark .priority-1 { background: rgba(239,68,68,0.07); }
+        .dark .priority-2 { background: rgba(249,115,22,0.07); }
+        .dark .priority-3 { background: rgba(99,102,241,0.07); }
+        .overdue-card { background: #fff0f0 !important; animation: border-pulse 2s infinite; }
+        @keyframes border-pulse { 0%,100% { border-right-width: 5px; } 50% { border-right-width: 10px; } }
 
-        .sortable-ghost { opacity: 0.4; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
-        .grab-handle { cursor: grab; padding: 5px; }
+        .sortable-ghost { opacity: 0.3; background: #e0e7ff !important; border: 2px dashed #4f46e5 !important; }
+        .grab-handle { cursor: grab; }
 
-        .active-nav { background-color: #4f46e5 !important; color: white !important; }
+        .active-nav { background: var(--accent) !important; color: white !important; }
         input, select, textarea { font-size: 16px !important; }
         #main-content-scroll { height: calc(100vh - 5rem); overflow-y: auto; padding-bottom: 10rem; }
-        .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
-        .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; animation: pulse 2s infinite; }
         .select-none { user-select: none; -webkit-user-select: none; }
 
-        /* Analytics Panel */
+        /* ===== STREAK BADGE ===== */
+        .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+        .live-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* ===== SHIELD BADGE ===== */
+        .shield-badge { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800; }
+
+        /* ===== ANALYTICS ===== */
         #analytics-panel { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .chart-tab { transition: all 0.2s; border-bottom: 3px solid transparent; }
         .chart-tab.active { border-bottom-color: #4f46e5; color: #4f46e5; font-weight: 700; }
         .dark .chart-tab.active { color: #818cf8; border-bottom-color: #818cf8; }
         .chart-wrapper { position: relative; height: 220px; }
-        .analytics-card { background: white; border-radius: 1.5rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
-        .dark .analytics-card { background: #1e293b; border-color: #334155; }
-        .category-legend-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
-        .dark .category-legend-item { border-color: #334155; }
+        .analytics-card { background: var(--card); border-radius: 1.5rem; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05); }
+        .category-legend-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
         .progress-bar-fill { height: 6px; border-radius: 3px; transition: width 0.8s ease; }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
         .analytics-animate { animation: slideDown 0.35s ease forwards; }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* ===== FOCUS MODE ===== */
+        #focus-mode-panel { display: none; }
+        #focus-mode-panel.active { display: flex; }
+        .focus-task-title { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 900; line-height: 1.2; }
+        .subtask-item { transition: all 0.2s; }
+        .subtask-item.done-sub span { text-decoration: line-through; color: var(--muted); }
+
+        /* ===== POMODORO TIMER ===== */
+        .timer-ring { transition: stroke-dashoffset 1s linear; }
+        @keyframes timerPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.03);} }
+        .timer-active { animation: timerPulse 2s ease-in-out infinite; }
+
+        /* ===== TASK PLAY BUTTON ===== */
+        .play-btn { transition: all 0.18s; }
+        .play-btn:hover { transform: scale(1.15); }
+        .play-btn.running { background: #fee2e2 !important; color: #ef4444 !important; }
+
+        /* ===== COMPLETION CELEBRATION ===== */
+        @keyframes completionPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .completion-pop { animation: completionPop 0.35s ease forwards; }
+
+        /* ===== DOPAMINE ANCHOR ===== */
+        .dopamine-anchor { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #fbbf24; border-radius: 0.75rem; padding: 0.4rem 0.75rem; font-size: 11px; font-weight: 700; color: #92400e; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .dark .dopamine-anchor { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: #fcd34d; }
+
+        /* ===== SUBTASKS IN CARD ===== */
+        .subtask-pill { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(99,102,241,0.1); color: #4f46e5; font-weight: 700; }
+        .dark .subtask-pill { background: rgba(99,102,241,0.2); color: #818cf8; }
+
+        /* ===== FORGIVING STREAK ===== */
+        .grace-day { opacity: 0.5; filter: grayscale(1); }
+
+        /* Mode toggle */
+        .mode-pill { display: flex; background: rgba(99,102,241,0.1); border-radius: 2rem; padding: 4px; }
+        .mode-btn { padding: 6px 14px; border-radius: 1.5rem; font-size: 12px; font-weight: 700; transition: all 0.2s; color: var(--muted); }
+        .mode-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
+
+        /* Subtask modal styles */
+        .subtask-input-row { display: flex; gap: 8px; align-items: center; }
+        .subtask-list-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--accent-soft); border-radius: 12px; font-size: 13px; }
+
+        /* Focus glow for active task */
+        .focus-glow { box-shadow: 0 0 0 3px rgba(99,102,241,0.25), 0 8px 32px rgba(99,102,241,0.12) !important; }
+
+        @keyframes celebrate { 0%{transform:rotate(-3deg) scale(1.05);} 50%{transform:rotate(3deg) scale(1.08);} 100%{transform:rotate(0) scale(1);} }
+        .celebrate { animation: celebrate 0.4s ease; }
+
+        /* ===== CHOOSE FOR ME ===== */
+        .choose-btn{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:2rem;padding:1rem 2rem;font-size:1.1rem;font-weight:900;box-shadow:0 4px 20px rgba(99,102,241,.4);transition:all .2s;border:none;cursor:pointer;display:flex;align-items:center;gap:.75rem;font-family:'Rubik',sans-serif}
+        .choose-btn:hover{transform:scale(1.04);box-shadow:0 6px 28px rgba(99,102,241,.55)}
+        .choose-btn:active{transform:scale(.97)}
+        @keyframes chooseShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-5deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(3deg)}}
+        .choose-shake{animation:chooseShake .5s ease}
+
+        /* ===== EMOTION CHECK-IN ===== */
+        #emotion-checkin{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(15,23,42,.9);backdrop-filter:blur(14px)}
+        #emotion-checkin.active{display:flex}
+        .emotion-btn{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1.1rem 1.3rem;border-radius:1.5rem;border:2px solid transparent;background:rgba(255,255,255,.07);cursor:pointer;transition:all .2s;color:white;font-weight:700;font-family:'Rubik',sans-serif}
+        .emotion-btn:hover{background:rgba(255,255,255,.16);transform:scale(1.06)}
+        .emotion-btn.selected{border-color:#6366f1;background:rgba(99,102,241,.25)}
+        .emotion-emoji{font-size:2.2rem}
+
+        /* ===== FLOW MODE ===== */
+        #flow-mode{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center}
+        #flow-mode.active{display:flex}
+        .flow-task-text{font-size:clamp(2rem,6vw,4rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:1rem}
+        .flow-step-text{font-size:clamp(1rem,3vw,1.5rem);color:rgba(255,255,255,.5);margin-bottom:2.5rem}
+        .flow-timer-num{font-size:clamp(3.5rem,9vw,6.5rem);font-weight:900;color:#6366f1;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+        .flow-dopamine{color:#fbbf24;font-size:1rem;font-weight:700;margin-top:1.5rem;opacity:.8}
+        .flow-exit-btn{position:absolute;top:1.5rem;left:1.5rem;background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);border:none;border-radius:1rem;padding:.6rem 1.2rem;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rubik',sans-serif}
+        .flow-exit-btn:hover{background:rgba(255,255,255,.14);color:white}
+        .flow-ring-wrap{position:relative;width:160px;height:160px;margin-bottom:.75rem;flex-shrink:0}
+        .flow-done-btn{margin-top:1.5rem;background:#10b981;color:white;border:none;border-radius:1.5rem;padding:.9rem 2.5rem;font-size:1rem;font-weight:900;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(16,185,129,.4);font-family:'Rubik',sans-serif}
+        .flow-done-btn:hover{transform:scale(1.05)}
+
+        /* ===== AI REWRITE ===== */
+        .ai-btn{background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none;border-radius:.75rem;padding:.5rem 1rem;font-size:.75rem;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem;font-family:'Rubik',sans-serif}
+        .ai-btn:hover{transform:scale(1.04)}
+        .ai-btn:disabled{opacity:.6;cursor:wait}
+        .ai-result-box{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:1rem;padding:1rem;margin-top:.5rem}
+        .dark .ai-result-box{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}
+        @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        .ai-loading{background:linear-gradient(90deg,rgba(99,102,241,.1) 25%,rgba(99,102,241,.25) 50%,rgba(99,102,241,.1) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.75rem;height:56px}
+
+        /* ===== SELF-TALK ===== */
+        .self-talk-preview{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-radius:.75rem;padding:.4rem .75rem;font-size:11px;font-weight:700;color:#5b21b6;display:inline-flex;align-items:center;gap:.3rem}
+        .dark .self-talk-preview{background:rgba(139,92,246,.15);color:#c4b5fd}
+
+        /* ===== ENERGY BADGE ===== */
+        .energy-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+        .energy-1{background:#dcfce7;color:#166534}.energy-2{background:#fef9c3;color:#854d0e}.energy-3{background:#fee2e2;color:#991b1b}
+        .dark .energy-1{background:rgba(16,185,129,.15);color:#6ee7b7}.dark .energy-2{background:rgba(234,179,8,.15);color:#fde047}.dark .energy-3{background:rgba(239,68,68,.15);color:#fca5a5}
+
+        /* ===== COMPLETION OVERLAY ===== */
+        #completion-overlay{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,23,42,.93);backdrop-filter:blur(8px)}
+        #completion-overlay.active{display:flex}
+        @keyframes completionIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .completion-card{animation:completionIn .5s cubic-bezier(.34,1.56,.64,1) forwards;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:2.5rem;padding:3rem 2.5rem;max-width:460px;width:100%;text-align:center}
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-gray-800 transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-900">
 
     <input type="file" id="json-file-input" accept=".json" class="hidden">
 
+    <!-- EMOTION CHECK-IN (wife only) -->
+    <div id="emotion-checkin">
+        <div class="max-w-lg w-full text-center">
+            <p class="text-white text-2xl font-black mb-1">היי חני 👋</p>
+            <p class="text-slate-400 mb-2 text-sm">איך את מרגישה <strong class="text-white">עכשיו</strong>?</p>
+            <p class="text-xs text-slate-500 mb-7">האפליקציה תבחר משימה שמתאימה לאנרגיה שלך ❤️</p>
+            <div class="grid grid-cols-3 gap-3 mb-7">
+                <button class="emotion-btn" onclick="app.selectEmotion('tired',this)"><span class="emotion-emoji">😴</span><span>עייפה</span><span class="text-[10px] opacity-60">5 דק' בלבד</span></button>
+                <button class="emotion-btn" onclick="app.selectEmotion('overwhelmed',this)"><span class="emotion-emoji">😰</span><span>מוצפת</span><span class="text-[10px] opacity-60">הכי קל שיש</span></button>
+                <button class="emotion-btn" onclick="app.selectEmotion('anxious',this)"><span class="emotion-emoji">😤</span><span>לחוצה</span><span class="text-[10px] opacity-60">צעד אחד</span></button>
+                <button class="emotion-btn" onclick="app.selectEmotion('ok',this)"><span class="emotion-emoji">😐</span><span>בסדר</span><span class="text-[10px] opacity-60">רגיל</span></button>
+                <button class="emotion-btn" onclick="app.selectEmotion('ready',this)"><span class="emotion-emoji">⚡</span><span>מוכנה!</span><span class="text-[10px] opacity-60">בואי נעוף</span></button>
+                <button class="emotion-btn" onclick="app.selectEmotion('skip',this)"><span class="emotion-emoji">➡️</span><span>דלג</span><span class="text-[10px] opacity-60">ישר לרשימה</span></button>
+            </div>
+            <p class="text-slate-600 text-xs">זה לא שיפוט — זה מידע. המוח שלך תקין לחלוטין 💙</p>
+        </div>
+    </div>
+
+    <!-- FLOW MODE (full black screen) -->
+    <div id="flow-mode">
+        <button class="flow-exit-btn" onclick="app.exitFlowMode()"><i class="fa-solid fa-xmark"></i> יציאה</button>
+        <div class="flow-ring-wrap">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(99,102,241,.15)" stroke-width="7"/>
+                <circle id="flow-ring" cx="50" cy="50" r="44" fill="none" stroke="#6366f1" stroke-width="7" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0" class="timer-ring"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                <span id="flow-timer-display" class="flow-timer-num">25:00</span>
+            </div>
+        </div>
+        <p id="flow-task-name" class="flow-task-text"></p>
+        <p id="flow-step-name" class="flow-step-text"></p>
+        <div id="flow-dop" class="flow-dopamine hidden">🎯 <span id="flow-dop-text"></span></div>
+        <button class="flow-done-btn" onclick="app.flowCompleteTask()"><i class="fa-solid fa-check"></i> סיימתי! 🎉</button>
+        <div style="display:flex;gap:12px;margin-top:16px">
+            <button onclick="app.flowAddTime(5)" style="background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:none;border-radius:1rem;padding:.5rem 1.2rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:Rubik,sans-serif">+ 5 דק'</button>
+            <button onclick="app.stopFlowTimer()" style="background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:none;border-radius:1rem;padding:.5rem 1.2rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:Rubik,sans-serif">⏹ עצור</button>
+        </div>
+    </div>
+
+    <!-- COMPLETION OVERLAY -->
+    <div id="completion-overlay">
+        <div class="completion-card">
+            <div style="font-size:4rem;margin-bottom:1rem" id="completion-emoji">🎉</div>
+            <div style="font-size:1.6rem;font-weight:900;color:white;margin-bottom:.75rem" id="completion-title">כל הכבוד!</div>
+            <div style="font-size:1.1rem;color:#a5b4fc;font-style:italic;margin-bottom:2rem;min-height:1.5rem" id="completion-self-talk-text"></div>
+            <button onclick="app.closeCompletionOverlay()" style="background:#6366f1;color:white;border:none;border-radius:1.5rem;padding:.9rem 2.5rem;font-size:1rem;font-weight:900;cursor:pointer;font-family:Rubik,sans-serif">המשך 🚀</button>
+        </div>
+    </div>
+
+    <!-- AUTH OVERLAY -->
     <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/95 backdrop-blur-md">
         <div class="max-w-md w-full text-center">
-            <div class="mb-12">
-                <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-white heading mb-2">TaskMaster Pro</h1>
-                <p class="text-slate-400">ברוכים הבאים, שובל וחני</p>
+            <div class="mb-10">
+                <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-5"><i class="fa-solid fa-layer-group"></i></div>
+                <h1 class="text-3xl font-black text-white mb-2">TaskMaster Pro</h1>
+                <p class="text-slate-400 text-sm">ברוכים הבאים, שובל וחני</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="app.loginAs('user')" class="bg-white p-6 rounded-3xl shadow-xl hover:scale-105 transition-all select-none flex flex-col items-center">
@@ -96,43 +263,56 @@
         </div>
     </div>
 
+    <!-- MAIN APP -->
     <div id="main-app" class="flex h-screen w-full overflow-hidden hidden">
-        
-        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none">
-            <div class="h-20 flex items-center justify-between px-8 border-b dark:border-slate-700">
-                <span class="text-2xl font-extrabold text-indigo-600 heading tracking-tight">TaskMaster</span>
-                <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-72 flex-shrink-0 border-l border-gray-200 dark:border-slate-700 fixed md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 flex flex-col shadow-2xl md:shadow-none z-50">
+            <div class="h-20 flex items-center justify-between px-6 border-b dark:border-slate-700">
+                <span class="text-xl font-black text-indigo-600">TaskMaster</span>
+                <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <div class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-slate-700 rounded-2xl border border-indigo-100">
+                <!-- Profile + Streak -->
+                <div class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-slate-700 rounded-2xl">
                     <div class="flex items-center justify-between mb-2">
                         <span id="streak-counter" class="streak-badge">🔥 0 ימים</span>
+                        <span id="shield-counter" class="shield-counter shield-badge hidden">🛡️ 2 מגנים</span>
                         <div class="text-[9px] text-slate-400 font-bold"><span class="live-indicator"></span> פעיל</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div id="user-avatar" class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm"></div>
+                        <div id="user-avatar" class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold"></div>
                         <span id="user-display-name" class="font-bold text-xs dark:text-white"></span>
                     </div>
+                    <p class="text-[9px] text-slate-400 mt-1">הרצף לא מתאפס — מגנים שומרים עליך 🛡️</p>
                     <button onclick="app.openWeeklySummary()" class="w-full mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase hover:underline">סיכום ביצועים</button>
                 </div>
 
-                <button onclick="app.setFilter('all')" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all nav-item" id="nav-all">
-                    <i class="fa-solid fa-layer-group"></i> <span>כל המשימות</span>
+                <!-- Mode Toggle -->
+                <div class="flex items-center justify-center py-2">
+                    <div class="mode-pill">
+                        <button id="mode-normal-btn" onclick="app.setMode('normal')" class="mode-btn active">📋 רגיל</button>
+                        <button id="mode-focus-btn" onclick="app.setMode('focus')" class="mode-btn">🎯 מיקוד</button>
+                    </div>
+                </div>
+
+                <button onclick="app.setFilter('all')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-all" id="nav-all">
+                    <i class="fa-solid fa-layer-group text-indigo-500"></i><span>כל המשימות</span>
                 </button>
 
-                <div class="pt-6">
+                <div class="pt-4">
                     <div class="flex items-center justify-between px-2 mb-2">
                         <p class="text-xs font-bold text-slate-400 uppercase">קטגוריות</p>
-                        <button onclick="app.openCategoryModal()" class="text-indigo-500"><i class="fa-solid fa-plus text-xs"></i></button>
+                        <button onclick="app.openCategoryModal()" class="text-indigo-500 hover:text-indigo-700"><i class="fa-solid fa-plus text-xs"></i></button>
                     </div>
                     <div id="sidebar-categories" class="space-y-1"></div>
                 </div>
 
-                <div class="pt-10 border-t dark:border-slate-700 mt-6">
-                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2 text-right">גיבוי ונתונים</p>
-                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
-                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500 transition-colors"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
+                <div class="pt-6 border-t dark:border-slate-700 mt-4">
+                    <p class="px-4 text-[10px] font-bold text-gray-400 uppercase mb-2">גיבוי</p>
+                    <button onclick="app.exportTasks()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500"><i class="fa-solid fa-download"></i> ייצוא JSON</button>
+                    <button onclick="document.getElementById('json-file-input').click()" class="w-full flex items-center gap-3 px-4 py-2 text-xs text-slate-500 hover:text-indigo-500"><i class="fa-solid fa-upload"></i> טעינת JSON</button>
                 </div>
             </nav>
             <div class="p-4"><button onclick="app.logout()" class="w-full py-3 text-red-500 text-sm font-bold">החלף פרופיל</button></div>
@@ -140,7 +320,9 @@
 
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="app.toggleSidebar()"></div>
 
+        <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col relative overflow-hidden">
+            <!-- HEADER -->
             <header class="h-20 glass flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-3 flex-1 max-w-xl">
                     <button onclick="app.toggleSidebar()" class="md:hidden text-slate-600 dark:text-white p-2"><i class="fa-solid fa-bars-staggered"></i></button>
@@ -153,16 +335,13 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="flex items-center gap-2">
-                    <!-- Analytics Toggle Button -->
-                    <button onclick="app.toggleAnalytics()" id="btn-analytics" class="w-9 h-9 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-indigo-600 relative" title="ניתוח נתונים">
+                    <button onclick="app.toggleAnalytics()" id="btn-analytics" class="w-9 h-9 rounded-xl flex items-center justify-center transition-all text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-indigo-600" title="ניתוחים">
                         <i class="fa-solid fa-chart-pie"></i>
-                        <span id="analytics-dot" class="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full hidden"></span>
                     </button>
-                    <div class="hidden sm:flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl ml-2">
-                        <button onclick="app.setViewMode('grid')" id="btn-grid" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm"><i class="fa-solid fa-grip"></i></button>
-                        <button onclick="app.setViewMode('list')" id="btn-list" class="w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400"><i class="fa-solid fa-list-ul"></i></button>
+                    <div class="hidden sm:flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
+                        <button onclick="app.setViewMode('grid')" id="btn-grid" class="w-9 h-9 rounded-lg flex items-center justify-center bg-white text-indigo-600 shadow-sm"><i class="fa-solid fa-grip"></i></button>
+                        <button onclick="app.setViewMode('list')" id="btn-list" class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400"><i class="fa-solid fa-list-ul"></i></button>
                     </div>
                     <button onclick="app.openTaskModal()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all select-none">+ חדש</button>
                 </div>
@@ -170,81 +349,138 @@
 
             <div id="main-content-scroll" class="px-4 md:px-8 py-6">
 
-                <!-- Stats Row -->
-                <div class="grid grid-cols-3 gap-3 md:gap-6 mb-6 text-right">
-                    <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-500 transition-all">
+                <!-- STATS ROW -->
+                <div class="grid grid-cols-3 gap-3 md:gap-5 mb-6">
+                    <button onclick="app.setFilter('all')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border dark:border-slate-700 hover:border-indigo-400 transition-all text-right">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">סה"כ</p>
-                        <h3 id="stat-total" class="text-2xl font-bold dark:text-white">0</h3>
+                        <h3 id="stat-total" class="text-2xl font-black dark:text-white">0</h3>
                     </button>
-                    <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-500 hover:bg-orange-50 transition-all">
+                    <button onclick="app.setFilter('active')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-orange-400 hover:bg-orange-50 transition-all text-right">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">פעיל</p>
-                        <h3 id="stat-active" class="text-2xl font-bold dark:text-white">0</h3>
+                        <h3 id="stat-active" class="text-2xl font-black dark:text-white">0</h3>
                     </button>
-                    <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-500 hover:bg-green-50 transition-all">
+                    <button onclick="app.setFilter('completed')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border-b-4 border-green-400 hover:bg-green-50 transition-all text-right">
                         <p class="text-slate-400 text-[10px] uppercase mb-1">בוצע</p>
-                        <h3 id="stat-completed" class="text-2xl font-bold dark:text-white">0</h3>
+                        <h3 id="stat-completed" class="text-2xl font-black dark:text-white">0</h3>
                     </button>
                 </div>
 
-                <!-- ===== ANALYTICS PANEL ===== -->
-                <div id="analytics-panel" class="hidden mb-8 analytics-animate">
-                    <!-- Tabs -->
-                    <div class="flex gap-6 border-b dark:border-slate-700 mb-5 text-sm text-slate-500 dark:text-slate-400">
-                        <button onclick="app.setChartTab('category')" id="tab-category" class="chart-tab active pb-3 px-1">פי קטגוריה</button>
-                        <button onclick="app.setChartTab('priority')" id="tab-priority" class="chart-tab pb-3 px-1">פי עדיפות</button>
-                        <button onclick="app.setChartTab('progress')" id="tab-progress" class="chart-tab pb-3 px-1">התקדמות</button>
+                <!-- FOCUS MODE PANEL -->
+                <div id="focus-mode-panel" class="hidden flex-col items-center justify-center min-h-[60vh] text-center px-4">
+
+                    <!-- Choose For Me -->
+                    <div class="mb-6">
+                        <button id="choose-for-me-btn" onclick="app.chooseForMe()" class="choose-btn mx-auto">
+                            <span style="font-size:1.4rem">🎲</span><span>בחרי בשבילי</span>
+                        </button>
+                        <p class="text-xs text-slate-400 mt-2">לא צריך להחליט — האפליקציה בוחרת בשבילך</p>
                     </div>
 
-                    <!-- Tab: Category Charts -->
-                    <div id="chart-view-category" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">משימות לפי קטגוריה — עמודות</h4>
-                            <div class="chart-wrapper"><canvas id="chart-bar-category"></canvas></div>
+                    <!-- Pomodoro Timer -->
+                    <div id="pomodoro-widget" class="mb-8">
+                        <div class="relative w-36 h-36 mx-auto mb-4">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(99,102,241,0.12)" stroke-width="8"/>
+                                <circle id="timer-ring" cx="50" cy="50" r="44" fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round"
+                                    stroke-dasharray="276.5" stroke-dashoffset="0" class="timer-ring"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="timer-display" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 tabular-nums">25:00</span>
+                                <span id="timer-label" class="text-[10px] text-slate-400 font-bold uppercase">עצור</span>
+                            </div>
                         </div>
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח קטגוריות — עוגה</h4>
-                            <div class="chart-wrapper"><canvas id="chart-pie-category"></canvas></div>
+                        <div class="flex gap-2 justify-center mb-2">
+                            <button onclick="app.startTimer(2)" class="px-3 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200 hover:bg-amber-100 transition-all">2 דק' ✨</button>
+                            <button onclick="app.startTimer(5)" class="px-3 py-2 rounded-full bg-slate-100 dark:bg-slate-700 text-xs font-bold hover:bg-indigo-100 transition-all">5 דק׳</button>
+                            <button onclick="app.startTimer(25)" class="px-3 py-2 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-md">25 דק׳</button>
+                            <button onclick="app.stopTimer()" class="px-3 py-2 rounded-full bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200 transition-all">⏹</button>
                         </div>
-                        <!-- Legend -->
-                        <div class="analytics-card md:col-span-2">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 text-right">פירוט קטגוריות</h4>
-                            <div id="category-detail-legend" class="space-y-1"></div>
+                        <p class="text-[10px] text-slate-400">2 דקות = "רק לנסות". 90% מהזמן ממשיכים 💡</p>
+                    </div>
+
+                    <!-- Focus Task Card -->
+                    <div id="focus-task-card" class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 text-right focus-glow">
+                        <div id="focus-empty" class="py-8 text-slate-400">
+                            <i class="fa-solid fa-circle-check text-5xl mb-4 opacity-30"></i>
+                            <p class="font-bold text-lg">אין משימות פעילות</p>
+                            <p class="text-sm mt-1">הוסיפי משימה חדשה למעלה</p>
+                        </div>
+                        <div id="focus-task-content" class="hidden">
+                            <div class="flex items-start justify-between mb-4">
+                                <button id="focus-complete-btn" onclick="app.focusCompleteTask()" class="w-10 h-10 border-2 border-indigo-400 rounded-2xl flex items-center justify-center hover:bg-indigo-50 transition-all flex-shrink-0 mt-1">
+                                    <i class="fa-solid fa-check text-indigo-400"></i>
+                                </button>
+                                <div class="flex-1 mr-4">
+                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                        <p id="focus-task-category" class="text-xs text-slate-400 uppercase font-bold"></p>
+                                        <span id="focus-energy-badge" class="energy-badge hidden"></span>
+                                    </div>
+                                    <p id="focus-task-title" class="focus-task-title dark:text-white"></p>
+                                </div>
+                            </div>
+                            <!-- Dopamine Anchor Display -->
+                            <div id="focus-dopamine-display" class="hidden mb-3">
+                                <div class="dopamine-anchor text-sm py-2 px-4">
+                                    <span>🎯</span>
+                                    <span id="focus-dopamine-text"></span>
+                                </div>
+                            </div>
+                            <!-- Self-Talk Display -->
+                            <div id="focus-self-talk-display" class="hidden mb-3">
+                                <div class="self-talk-preview">💬 <span id="focus-self-talk-text"></span></div>
+                            </div>
+                            <!-- Subtasks -->
+                            <div id="focus-subtasks" class="mt-4 space-y-2"></div>
+                            <!-- Flow Mode Button -->
+                            <button onclick="app.enterFlowMode()" class="w-full mt-5 bg-black text-white rounded-2xl py-3 font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-900 transition-all">
+                                <i class="fa-solid fa-expand"></i> מצב זרימה — מסך שחור, אפס הסחות
+                            </button>
+                            <!-- Navigation -->
+                            <div class="flex gap-3 mt-3 justify-end">
+                                <button onclick="app.focusPrevTask()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-bold hover:bg-slate-200 transition-all"><i class="fa-solid fa-chevron-right text-xs"></i> קודם</button>
+                                <button onclick="app.focusNextTask()" class="px-4 py-2 rounded-xl bg-indigo-100 text-indigo-700 text-sm font-bold hover:bg-indigo-200 transition-all">הבא <i class="fa-solid fa-chevron-left text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="focus-task-counter" class="mt-4 text-xs text-slate-400 font-bold"></p>
+                </div>
+
+                <!-- NORMAL MODE: Analytics + Tasks -->
+                <div id="normal-mode-content">
+                    <!-- ANALYTICS PANEL -->
+                    <div id="analytics-panel" class="hidden mb-8 analytics-animate">
+                        <div class="flex gap-6 border-b dark:border-slate-700 mb-5 text-sm text-slate-500">
+                            <button onclick="app.setChartTab('category')" id="tab-category" class="chart-tab active pb-3 px-1">קטגוריה</button>
+                            <button onclick="app.setChartTab('priority')" id="tab-priority" class="chart-tab pb-3 px-1">עדיפות</button>
+                            <button onclick="app.setChartTab('progress')" id="tab-progress" class="chart-tab pb-3 px-1">התקדמות</button>
+                        </div>
+                        <div id="chart-view-category" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">עמודות לפי קטגוריה</h4><div class="chart-wrapper"><canvas id="chart-bar-category"></canvas></div></div>
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">עוגה — קטגוריות</h4><div class="chart-wrapper"><canvas id="chart-pie-category"></canvas></div></div>
+                            <div class="analytics-card md:col-span-2"><h4 class="text-xs font-bold text-slate-400 uppercase mb-3 text-right">פירוט</h4><div id="category-detail-legend" class="space-y-1"></div></div>
+                        </div>
+                        <div id="chart-view-priority" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">עדיפות — עמודות</h4><div class="chart-wrapper"><canvas id="chart-bar-priority"></canvas></div></div>
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">עדיפות — עוגה</h4><div class="chart-wrapper"><canvas id="chart-pie-priority"></canvas></div></div>
+                        </div>
+                        <div id="chart-view-progress" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">השלמה לפי קטגוריה</h4><div class="chart-wrapper"><canvas id="chart-bar-progress"></canvas></div></div>
+                            <div class="analytics-card"><h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">אחוזי השלמה</h4><div id="progress-bars-list" class="space-y-3 py-2"></div></div>
                         </div>
                     </div>
 
-                    <!-- Tab: Priority Charts -->
-                    <div id="chart-view-priority" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח לפי עדיפות — עמודות</h4>
-                            <div class="chart-wrapper"><canvas id="chart-bar-priority"></canvas></div>
-                        </div>
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">פילוח עדיפות — עוגה</h4>
-                            <div class="chart-wrapper"><canvas id="chart-pie-priority"></canvas></div>
-                        </div>
-                    </div>
-
-                    <!-- Tab: Progress -->
-                    <div id="chart-view-progress" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">סטטוס השלמה לפי קטגוריה</h4>
-                            <div class="chart-wrapper"><canvas id="chart-bar-progress"></canvas></div>
-                        </div>
-                        <div class="analytics-card">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 text-right">אחוזי השלמה לפי קטגוריה</h4>
-                            <div id="progress-bars-list" class="space-y-3 py-2"></div>
-                        </div>
+                    <div id="tasks-container"></div>
+                    <div id="empty-state" class="hidden py-28 text-center text-slate-400 opacity-40">
+                        <i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i>
+                        <p class="text-xl font-bold">אין משימות להצגה</p>
                     </div>
                 </div>
-                <!-- ===== END ANALYTICS PANEL ===== -->
-
-                <div id="tasks-container"></div>
-                <div id="empty-state" class="hidden py-32 text-center text-slate-400 opacity-40"><i class="fa-solid fa-calendar-xmark text-6xl mb-4"></i><p class="text-xl">אין משימות להצגה</p></div>
             </div>
 
+            <!-- BOTTOM NAV (mobile) -->
             <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t dark:border-slate-700 px-6 py-4 flex justify-between items-center z-30 shadow-lg">
-                <button onclick="app.setFilter('all')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
-                <button onclick="app.openWeeklySummary()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-trophy"></i><span class="text-[10px]">סיכום</span></button>
+                <button onclick="app.setMode('normal')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-house"></i><span class="text-[10px]">ראשי</span></button>
+                <button onclick="app.setMode('focus')" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-crosshairs"></i><span class="text-[10px]">מיקוד</span></button>
                 <div class="w-10"></div>
                 <button onclick="app.toggleAnalytics()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-chart-pie"></i><span class="text-[10px]">גרפים</span></button>
                 <button onclick="app.toggleTheme()" class="flex flex-col items-center gap-1 text-slate-400"><i class="fa-solid fa-moon"></i><span class="text-[10px]">מצב</span></button>
@@ -253,38 +489,99 @@
         </main>
     </div>
 
-    <!-- Weekly Modal -->
+    <!-- WEEKLY MODAL -->
     <div id="weekly-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onclick="app.closeWeeklySummary()"></div>
         <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-[2.5rem] p-8 relative z-10 text-right shadow-2xl">
-            <h2 class="text-2xl font-bold dark:text-white heading mb-6 text-center">הסיכום השבועי</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
+            <h2 class="text-2xl font-black dark:text-white mb-6 text-center">הסיכום השבועי 🏆</h2>
+            <div class="grid grid-cols-3 gap-3 mb-6">
                 <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
                     <p class="text-xs text-slate-400">הושלמו</p>
                     <h4 id="weekly-count" class="text-3xl font-black text-indigo-600">0</h4>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
-                    <p class="text-xs text-slate-400">רצף (Streak)</p>
+                    <p class="text-xs text-slate-400">🔥 רצף</p>
                     <h4 id="weekly-streak" class="text-3xl font-black text-orange-500">0</h4>
                 </div>
+                <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-2xl text-center">
+                    <p class="text-xs text-slate-400">🛡️ מגנים</p>
+                    <h4 id="weekly-shields" class="text-3xl font-black text-blue-500">0</h4>
+                </div>
             </div>
-            <div id="today-suggestions" class="space-y-2 mb-8"></div>
-            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">סגור</button>
+            <div id="today-suggestions" class="space-y-2 mb-6"></div>
+            <button onclick="app.closeWeeklySummary()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold">סגור</button>
         </div>
     </div>
 
-    <!-- Task Modal -->
+    <!-- TASK MODAL (with subtasks + dopamine anchor) -->
     <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeTaskModal()"></div>
-        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right">
-            <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center">
-                <h3 id="modal-title" class="font-bold text-lg dark:text-white heading">משימה</h3>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden text-right max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10">
+                <h3 id="modal-title" class="font-black text-lg dark:text-white">משימה</h3>
                 <button type="button" onclick="app.closeTaskModal()" class="text-slate-400"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="task-form" onsubmit="app.saveTask(event)" class="p-6 space-y-4 text-right">
+            <div class="p-6 space-y-4">
                 <input type="hidden" id="task-id">
-                <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500">
-                <textarea id="task-desc" placeholder="פירוט המשימה (אופציונלי)..." rows="3" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none"></textarea>
+
+                <!-- Title + AI Rewrite -->
+                <div>
+                    <input type="text" id="task-title" placeholder="מה המשימה?" required class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400">
+                    <div class="flex items-center gap-2 mt-2 flex-wrap">
+                        <button type="button" id="ai-rewrite-btn" onclick="app.aiRewriteTask()" class="ai-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> תרגמי ל"פעולה ראשונה" ✨</button>
+                        <span class="text-[10px] text-slate-400">AI יפרק לצעד ספציפי של 2-3 דקות</span>
+                    </div>
+                    <div id="ai-result-area" class="hidden mt-2">
+                        <div id="ai-loading" class="ai-loading hidden"></div>
+                        <div id="ai-result-box" class="ai-result-box hidden">
+                            <p class="text-xs font-bold text-green-700 dark:text-green-400 mb-2">✨ הצעד הראשון שלך:</p>
+                            <p id="ai-result-text" class="text-sm font-bold dark:text-white"></p>
+                            <div class="flex gap-2 mt-3">
+                                <button type="button" onclick="app.applyAiResult()" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold">השתמשי ✓</button>
+                                <button type="button" onclick="app.aiRewriteTask()" class="text-xs bg-slate-200 dark:bg-slate-600 dark:text-white px-3 py-1.5 rounded-lg font-bold">נסי שוב</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <textarea id="task-desc" placeholder="פירוט (אופציונלי)..." rows="2" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none resize-none"></textarea>
+
+                <!-- Self-Talk Field -->
+                <div class="bg-purple-50 dark:bg-slate-700 rounded-xl p-4 border border-purple-100 dark:border-slate-600">
+                    <label class="text-xs font-black text-purple-700 dark:text-purple-400 uppercase mb-2 block">💬 מה תגידי לעצמך כשתסיימי?</label>
+                    <input type="text" id="task-self-talk" placeholder='"הוכחתי לעצמי שאני מסוגלת!"' class="w-full p-3 rounded-xl bg-white dark:bg-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-purple-400 text-sm">
+                    <p class="text-[10px] text-purple-500 mt-1">יוצג על המסך ברגע שתסיימי 💜</p>
+                </div>
+
+                <!-- DOPAMINE ANCHOR FIELD -->
+                <div class="bg-amber-50 dark:bg-slate-700 rounded-xl p-4 border border-amber-200 dark:border-slate-600">
+                    <label class="text-xs font-black text-amber-700 dark:text-amber-400 uppercase mb-2 block">🎯 עוגן דופמין — מה ה"צ׳יט קוד" שלי?</label>
+                    <input type="text" id="task-dopamine" placeholder="למשל: פודקאסט X, שוקו קר, מוזיקה טובה..." class="w-full p-3 rounded-xl bg-white dark:bg-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-amber-400 text-sm">
+                    <p class="text-[10px] text-amber-600 dark:text-amber-400 mt-1">יוצג לצד המשימה כתזכורת לפרס המיידי 🏆</p>
+                </div>
+
+                <!-- Energy Level -->
+                <div>
+                    <label class="text-xs font-black text-slate-500 uppercase mb-2 block">🔋 כמה אנרגיה נדרשת?</label>
+                    <div class="flex gap-2">
+                        <button type="button" id="energy-1" onclick="app.setEnergy(1)" class="flex-1 py-2.5 rounded-xl text-xs font-bold border-2 border-transparent bg-green-50 text-green-700 hover:border-green-400 transition-all">🔋 נמוכה<br><span class="font-normal opacity-70">גם עייפה</span></button>
+                        <button type="button" id="energy-2" onclick="app.setEnergy(2)" class="flex-1 py-2.5 rounded-xl text-xs font-bold border-2 border-yellow-400 bg-yellow-50 text-yellow-700 transition-all">🔋🔋 בינונית<br><span class="font-normal opacity-70">רגיל</span></button>
+                        <button type="button" id="energy-3" onclick="app.setEnergy(3)" class="flex-1 py-2.5 rounded-xl text-xs font-bold border-2 border-transparent bg-red-50 text-red-700 hover:border-red-400 transition-all">🔋🔋🔋 גבוהה<br><span class="font-normal opacity-70">ריכוז מלא</span></button>
+                    </div>
+                </div>
+
+                <!-- SUBTASKS -->
+                <div class="bg-indigo-50 dark:bg-slate-700 rounded-xl p-4 border border-indigo-100 dark:border-slate-600">
+                    <label class="text-xs font-black text-indigo-700 dark:text-indigo-300 uppercase mb-3 block">📌 תת-משימות — פירוק לצעדים קטנים</label>
+                    <div id="subtasks-list" class="space-y-2 mb-3"></div>
+                    <div class="subtask-input-row">
+                        <input type="text" id="subtask-input" placeholder='הכי קל קודם... "לפתוח את הקובץ"' class="flex-1 p-3 rounded-xl bg-white dark:bg-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-indigo-400 text-sm"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault(); app.addSubtask();}">
+                        <button type="button" onclick="app.addSubtask()" class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-lg hover:bg-indigo-700">+</button>
+                    </div>
+                    <p class="text-[10px] text-indigo-500 mt-2">טיפ: הצעד הראשון — הכי קטן שאפשר. "לפתוח את הקובץ" זה מספיק ✓</p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <select id="task-category" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none cursor-pointer"></select>
                     <select id="task-priority" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
@@ -294,22 +591,22 @@
                     </select>
                 </div>
                 <input type="date" id="task-date" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-700 dark:text-white outline-none">
-                <button type="submit" id="btn-save-task" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">שמור שינויים</button>
-            </form>
+                <button type="button" id="btn-save-task" onclick="app.saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all">שמור</button>
+            </div>
         </div>
     </div>
 
-    <!-- Category Modal -->
+    <!-- CATEGORY MODAL -->
     <div id="category-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeCategoryModal()"></div>
         <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 relative z-10 text-right shadow-2xl">
-            <h3 class="text-xl font-bold dark:text-white mb-6 heading">ניהול קטגוריה</h3>
+            <h3 class="text-xl font-black dark:text-white mb-6">ניהול קטגוריה</h3>
             <input type="hidden" id="edit-cat-id">
             <div class="space-y-4">
                 <input type="text" id="cat-name-input" placeholder="שם הקטגוריה" class="w-full p-4 rounded-xl bg-gray-50 dark:bg-slate-700 dark:text-white outline-none">
                 <input type="color" id="cat-color-picker" class="w-full h-12 rounded-xl bg-transparent border-none cursor-pointer">
                 <button onclick="app.saveCategory()" type="button" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">שמור</button>
-                <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm">מחק</button>
+                <button onclick="app.deleteCategory()" type="button" id="btn-delete-cat" class="hidden text-red-500 py-2 font-bold text-sm w-full text-center">מחק קטגוריה</button>
             </div>
         </div>
     </div>
@@ -325,7 +622,7 @@
             projectId: "task-manager-109e0",
             storageBucket: "task-manager-109e0.firebasestorage.app",
             messagingSenderId: "489374964203",
-            appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae",
+            appId: "1:489374964203:web:7b09fd97bc9f9b7d5021ae"
         };
 
         const fApp = initializeApp(firebaseConfig);
@@ -335,9 +632,19 @@
 
         const appState = {
             profile: null, tasks: [], categories: [], filter: 'all', viewMode: 'grid',
-            listeners: [], stats: { streak: 0 }, sortableInstance: null,
-            analyticsOpen: false, currentChartTab: 'category',
-            charts: {}
+            listeners: [], stats: { streak: 0, shields: 2 }, sortableInstance: null,
+            analyticsOpen: false, currentChartTab: 'category', charts: {},
+            mode: 'normal',
+            // Pomodoro
+            timerInterval: null, timerSeconds: 0, timerTotal: 0, activeTimerTaskId: null,
+            // Flow mode timer (separate)
+            flowTimerInterval: null, flowTimerSeconds: 0, flowTimerTotal: 0, flowTaskId: null,
+            // Focus mode
+            focusIndex: 0,
+            // Subtasks being edited
+            pendingSubtasks: [],
+            // New v3 fields
+            pendingEnergy: 2, aiResultText: '', emotionFilter: null
         };
 
         // ============================================================
@@ -345,211 +652,53 @@
         // ============================================================
         const analytics = {
             isDark() { return document.documentElement.classList.contains('dark'); },
-
-            getChartDefaults() {
-                return {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    animation: { duration: 600, easing: 'easeOutQuart' }
-                };
+            getDefaults() {
+                return { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, animation: { duration: 500 } };
             },
-
             buildCategoryData() {
                 const cats = appState.categories;
-                const labels = cats.map(c => c.name);
-                const colors = cats.map(c => c.color);
-                const total = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id).length);
-                const done = cats.map(c => appState.tasks.filter(t => t.categoryId === c.id && t.completed).length);
-                const pending = total.map((t, i) => t - done[i]);
-                return { labels, colors, total, done, pending };
+                return {
+                    labels: cats.map(c => c.name), colors: cats.map(c => c.color),
+                    total: cats.map(c => appState.tasks.filter(t => t.categoryId === c.id).length),
+                    done: cats.map(c => appState.tasks.filter(t => t.categoryId === c.id && t.completed).length),
+                    pending: cats.map((c,i) => appState.tasks.filter(t => t.categoryId === c.id).length - appState.tasks.filter(t => t.categoryId === c.id && t.completed).length)
+                };
             },
-
             buildPriorityData() {
-                const pDefs = [
-                    { label: 'דחוף מאוד 🔴', color: '#ef4444', val: 1 },
-                    { label: 'עדיפות גבוהה 🟠', color: '#f97316', val: 2 },
-                    { label: 'רגילה 🔵', color: '#3b82f6', val: 3 }
-                ];
-                const counts = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val).length);
-                const done = pDefs.map(p => appState.tasks.filter(t => t.priority === p.val && t.completed).length);
-                return { labels: pDefs.map(p => p.label), colors: pDefs.map(p => p.color), counts, done };
+                const p = [{label:'דחוף 🔴',color:'#ef4444',val:1},{label:'גבוהה 🟠',color:'#f97316',val:2},{label:'רגילה 🔵',color:'#6366f1',val:3}];
+                return { labels: p.map(x=>x.label), colors: p.map(x=>x.color),
+                    counts: p.map(x=>appState.tasks.filter(t=>t.priority===x.val).length),
+                    done: p.map(x=>appState.tasks.filter(t=>t.priority===x.val&&t.completed).length) };
             },
-
-            destroyChart(key) {
-                if (appState.charts[key]) { appState.charts[key].destroy(); delete appState.charts[key]; }
-            },
-
-            renderAll() {
-                this.renderCategoryCharts();
-                this.renderPriorityCharts();
-                this.renderProgressCharts();
-            },
-
+            destroyChart(k) { if(appState.charts[k]) { appState.charts[k].destroy(); delete appState.charts[k]; } },
+            renderAll() { this.renderCategoryCharts(); this.renderPriorityCharts(); this.renderProgressCharts(); },
             renderCategoryCharts() {
-                const d = this.buildCategoryData();
-                const defaults = this.getChartDefaults();
-                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
+                const d=this.buildCategoryData(), def=this.getDefaults(), tc=this.isDark()?'#94a3b8':'#64748b', gc=this.isDark()?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
                 this.destroyChart('barCat');
-                const ctxBar = document.getElementById('chart-bar-category');
-                if (ctxBar) {
-                    appState.charts['barCat'] = new Chart(ctxBar, {
-                        type: 'bar',
-                        data: {
-                            labels: d.labels,
-                            datasets: [
-                                { label: 'ממתין', data: d.pending, backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
-                                { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
-                            ]
-                        },
-                        options: {
-                            ...defaults,
-                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                            scales: {
-                                x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
-                                y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
+                const c1=document.getElementById('chart-bar-category');
+                if(c1) appState.charts['barCat']=new Chart(c1,{type:'bar',data:{labels:d.labels,datasets:[{label:'ממתין',data:d.pending,backgroundColor:d.colors.map(c=>c+'cc'),borderRadius:8,borderSkipped:false},{label:'הושלם',data:d.done,backgroundColor:d.colors.map(c=>c+'55'),borderRadius:8,borderSkipped:false}]},options:{...def,plugins:{...def.plugins,legend:{display:true,position:'top',labels:{color:tc,font:{family:'Rubik',size:11},boxWidth:12,padding:10}}},scales:{x:{stacked:true,ticks:{color:tc,font:{family:'Rubik'}},grid:{color:gc}},y:{stacked:true,ticks:{color:tc,font:{family:'Rubik'},stepSize:1},grid:{color:gc},beginAtZero:true}}}});
                 this.destroyChart('pieCat');
-                const ctxPie = document.getElementById('chart-pie-category');
-                if (ctxPie) {
-                    appState.charts['pieCat'] = new Chart(ctxPie, {
-                        type: 'doughnut',
-                        data: {
-                            labels: d.labels,
-                            datasets: [{ data: d.total, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
-                        },
-                        options: {
-                            ...defaults,
-                            cutout: '65%',
-                            plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
-                        }
-                    });
-                }
-
-                // Detail Legend
-                const legend = document.getElementById('category-detail-legend');
-                if (legend) {
-                    legend.innerHTML = d.labels.map((label, i) => {
-                        const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
-                        return `
-                            <div class="category-legend-item">
-                                <div class="flex items-center gap-3 flex-1">
-                                    <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${d.colors[i]}"></span>
-                                    <span class="text-sm font-medium dark:text-white">${label}</span>
-                                </div>
-                                <div class="flex items-center gap-4 text-xs text-slate-400">
-                                    <span>${d.done[i]}/${d.total[i]}</span>
-                                    <div class="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
-                                        <div class="progress-bar-fill rounded-full" style="width:${pct}%; background:${d.colors[i]}"></div>
-                                    </div>
-                                    <span class="font-bold w-8 text-left" style="color:${d.colors[i]}">${pct}%</span>
-                                </div>
-                            </div>`;
-                    }).join('');
-                }
+                const c2=document.getElementById('chart-pie-category');
+                if(c2) appState.charts['pieCat']=new Chart(c2,{type:'doughnut',data:{labels:d.labels,datasets:[{data:d.total,backgroundColor:d.colors,borderWidth:3,borderColor:this.isDark()?'#1e293b':'#fff',hoverOffset:6}]},options:{...def,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:tc,font:{family:'Rubik',size:11},boxWidth:12,padding:8}}}}});
+                const leg=document.getElementById('category-detail-legend');
+                if(leg) leg.innerHTML=d.labels.map((l,i)=>{const pct=d.total[i]>0?Math.round((d.done[i]/d.total[i])*100):0;return`<div class="category-legend-item"><div class="flex items-center gap-3 flex-1"><span class="w-3 h-3 rounded-full" style="background:${d.colors[i]}"></span><span class="text-sm font-medium dark:text-white">${l}</span></div><div class="flex items-center gap-4 text-xs text-slate-400"><span>${d.done[i]}/${d.total[i]}</span><div class="w-20 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5"><div class="progress-bar-fill" style="width:${pct}%;background:${d.colors[i]}"></div></div><span class="font-bold w-8 text-left" style="color:${d.colors[i]}">${pct}%</span></div></div>`}).join('');
             },
-
             renderPriorityCharts() {
-                const d = this.buildPriorityData();
-                const defaults = this.getChartDefaults();
-                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
+                const d=this.buildPriorityData(),def=this.getDefaults(),tc=this.isDark()?'#94a3b8':'#64748b',gc=this.isDark()?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
                 this.destroyChart('barPri');
-                const ctxBar = document.getElementById('chart-bar-priority');
-                if (ctxBar) {
-                    appState.charts['barPri'] = new Chart(ctxBar, {
-                        type: 'bar',
-                        data: {
-                            labels: d.labels,
-                            datasets: [
-                                { label: 'פעיל', data: d.counts.map((c, i) => c - d.done[i]), backgroundColor: d.colors.map(c => c + 'cc'), borderRadius: 8, borderSkipped: false },
-                                { label: 'בוצע', data: d.done, backgroundColor: d.colors.map(c => c + '55'), borderRadius: 8, borderSkipped: false }
-                            ]
-                        },
-                        options: {
-                            ...defaults,
-                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                            scales: {
-                                x: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik', size: 10 } }, grid: { color: gridColor } },
-                                y: { stacked: true, ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
+                const c1=document.getElementById('chart-bar-priority');
+                if(c1) appState.charts['barPri']=new Chart(c1,{type:'bar',data:{labels:d.labels,datasets:[{label:'פעיל',data:d.counts.map((c,i)=>c-d.done[i]),backgroundColor:d.colors.map(c=>c+'cc'),borderRadius:8,borderSkipped:false},{label:'בוצע',data:d.done,backgroundColor:d.colors.map(c=>c+'55'),borderRadius:8,borderSkipped:false}]},options:{...def,plugins:{...def.plugins,legend:{display:true,position:'top',labels:{color:tc,font:{family:'Rubik',size:11},boxWidth:12,padding:10}}},scales:{x:{stacked:true,ticks:{color:tc,font:{family:'Rubik',size:10}},grid:{color:gc}},y:{stacked:true,ticks:{color:tc,font:{family:'Rubik'},stepSize:1},grid:{color:gc},beginAtZero:true}}}});
                 this.destroyChart('piePri');
-                const ctxPie = document.getElementById('chart-pie-priority');
-                if (ctxPie) {
-                    appState.charts['piePri'] = new Chart(ctxPie, {
-                        type: 'pie',
-                        data: {
-                            labels: d.labels,
-                            datasets: [{ data: d.counts, backgroundColor: d.colors, borderWidth: 3, borderColor: this.isDark() ? '#1e293b' : '#fff', hoverOffset: 6 }]
-                        },
-                        options: {
-                            ...defaults,
-                            plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 10 } } }
-                        }
-                    });
-                }
+                const c2=document.getElementById('chart-pie-priority');
+                if(c2) appState.charts['piePri']=new Chart(c2,{type:'pie',data:{labels:d.labels,datasets:[{data:d.counts,backgroundColor:d.colors,borderWidth:3,borderColor:this.isDark()?'#1e293b':'#fff',hoverOffset:6}]},options:{...def,plugins:{legend:{display:true,position:'bottom',labels:{color:tc,font:{family:'Rubik',size:11},boxWidth:12,padding:8}}}}});
             },
-
             renderProgressCharts() {
-                const d = this.buildCategoryData();
-                const defaults = this.getChartDefaults();
-                const textColor = this.isDark() ? '#94a3b8' : '#64748b';
-                const gridColor = this.isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
+                const d=this.buildCategoryData(),def=this.getDefaults(),tc=this.isDark()?'#94a3b8':'#64748b',gc=this.isDark()?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
                 this.destroyChart('barProg');
-                const ctxBar = document.getElementById('chart-bar-progress');
-                if (ctxBar) {
-                    appState.charts['barProg'] = new Chart(ctxBar, {
-                        type: 'bar',
-                        data: {
-                            labels: d.labels,
-                            datasets: [
-                                { label: 'הושלם', data: d.done, backgroundColor: d.colors.map(c => c + 'dd'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false },
-                                { label: 'נותר', data: d.pending, backgroundColor: d.colors.map(c => c + '33'), borderRadius: { topLeft: 8, topRight: 8 }, borderSkipped: false }
-                            ]
-                        },
-                        options: {
-                            ...defaults,
-                            plugins: { ...defaults.plugins, legend: { display: true, position: 'top', labels: { color: textColor, font: { family: 'Rubik', size: 11 }, boxWidth: 12, padding: 12 } } },
-                            scales: {
-                                x: { ticks: { color: textColor, font: { family: 'Rubik' } }, grid: { color: gridColor } },
-                                y: { ticks: { color: textColor, font: { family: 'Rubik' }, stepSize: 1 }, grid: { color: gridColor }, beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
-                // Progress bars
-                const pbList = document.getElementById('progress-bars-list');
-                if (pbList) {
-                    pbList.innerHTML = d.labels.map((label, i) => {
-                        const pct = d.total[i] > 0 ? Math.round((d.done[i] / d.total[i]) * 100) : 0;
-                        return `
-                            <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full" style="background:${d.colors[i]}"></span>
-                                        <span class="text-xs font-medium dark:text-white">${label}</span>
-                                    </div>
-                                    <span class="text-xs font-bold" style="color:${d.colors[i]}">${pct}%</span>
-                                </div>
-                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                                    <div class="progress-bar-fill rounded-full" style="width:${pct}%; background:${d.colors[i]}"></div>
-                                </div>
-                                <p class="text-[10px] text-slate-400 mt-1 text-left">${d.done[i]} מתוך ${d.total[i]} משימות</p>
-                            </div>`;
-                    }).join('');
-                }
+                const c1=document.getElementById('chart-bar-progress');
+                if(c1) appState.charts['barProg']=new Chart(c1,{type:'bar',data:{labels:d.labels,datasets:[{label:'הושלם',data:d.done,backgroundColor:d.colors.map(c=>c+'dd'),borderRadius:{topLeft:8,topRight:8},borderSkipped:false},{label:'נותר',data:d.pending,backgroundColor:d.colors.map(c=>c+'33'),borderRadius:{topLeft:8,topRight:8},borderSkipped:false}]},options:{...def,plugins:{...def.plugins,legend:{display:true,position:'top',labels:{color:tc,font:{family:'Rubik',size:11},boxWidth:12,padding:10}}},scales:{x:{ticks:{color:tc,font:{family:'Rubik'}},grid:{color:gc}},y:{ticks:{color:tc,font:{family:'Rubik'},stepSize:1},grid:{color:gc},beginAtZero:true}}}});
+                const pb=document.getElementById('progress-bars-list');
+                if(pb) pb.innerHTML=d.labels.map((l,i)=>{const pct=d.total[i]>0?Math.round((d.done[i]/d.total[i])*100):0;return`<div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${d.colors[i]}"></span><span class="text-xs font-medium dark:text-white">${l}</span></div><span class="text-xs font-black" style="color:${d.colors[i]}">${pct}%</span></div><div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2"><div class="progress-bar-fill" style="width:${pct}%;background:${d.colors[i]}"></div></div><p class="text-[10px] text-slate-400 mt-1 text-left">${d.done[i]} מתוך ${d.total[i]}</p></div>`}).join('');
             }
         };
 
@@ -557,6 +706,8 @@
         // MAIN APP
         // ============================================================
         const app = {
+
+            // ---- AUTH ----
             async loginAs(profile) {
                 appState.profile = profile;
                 localStorage.setItem('tm_last_profile', profile);
@@ -567,365 +718,709 @@
                     this.updateProfileUI(profile);
                     this.startSync();
                     this.loadStreak();
-                } catch (e) { Swal.fire('שגיאה', 'חיבור Firebase נכשל.', 'error'); }
+                    if(profile==='wife') setTimeout(()=>this.showEmotionCheckin(),400);
+                } catch(e) { Swal.fire('שגיאה','חיבור Firebase נכשל.','error'); }
             },
 
             updateProfileUI(p) {
-                const isUser = p === 'user', av = document.getElementById('user-avatar');
-                av.className = `w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold shadow-sm ${isUser ? 'bg-blue-500' : 'bg-pink-500'}`;
-                av.innerHTML = isUser ? '<i class="fa-solid fa-user-tie"></i>' : '<i class="fa-solid fa-user-astronaut"></i>';
-                document.getElementById('user-display-name').innerText = isUser ? "שובל" : "חני";
+                const av=document.getElementById('user-avatar');
+                const isUser=p==='user';
+                av.className=`w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold ${isUser?'bg-blue-500':'bg-pink-500'}`;
+                av.innerHTML=isUser?'<i class="fa-solid fa-user-tie"></i>':'<i class="fa-solid fa-user-astronaut"></i>';
+                document.getElementById('user-display-name').innerText=isUser?'שובל':'חני';
             },
 
             startSync() {
-                appState.listeners.forEach(unsub => unsub());
-                const base = `artifacts/${artifactId}/users/${appState.profile}`;
-                appState.listeners.push(onSnapshot(collection(db, `${base}/categories`), snap => {
-                    appState.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    if (appState.categories.length === 0) this.seedInitialCategories();
+                appState.listeners.forEach(u=>u());
+                const base=`artifacts/${artifactId}/users/${appState.profile}`;
+                appState.listeners.push(onSnapshot(collection(db,`${base}/categories`),snap=>{
+                    appState.categories=snap.docs.map(d=>({id:d.id,...d.data()}));
+                    if(!appState.categories.length) this.seedInitialCategories();
                     this.renderSidebarCategories();
                     this.renderTasks();
-                    if (appState.analyticsOpen) analytics.renderAll();
+                    if(appState.analyticsOpen) analytics.renderAll();
                 }));
-                appState.listeners.push(onSnapshot(collection(db, `${base}/tasks`), async snap => {
-                    appState.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    if (appState.tasks.length === 0) await this.runOnboarding();
+                appState.listeners.push(onSnapshot(collection(db,`${base}/tasks`),async snap=>{
+                    appState.tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+                    if(!appState.tasks.length) await this.runOnboarding();
                     this.renderStats();
                     this.renderTasks();
-                    if (appState.analyticsOpen) analytics.renderAll();
-                    // Show analytics dot if there's data
-                    document.getElementById('analytics-dot').classList.toggle('hidden', appState.tasks.length === 0);
+                    if(appState.mode==='focus') this.renderFocusMode();
+                    if(appState.analyticsOpen) analytics.renderAll();
                 }));
             },
 
-            // ---- Analytics ----
-            toggleAnalytics() {
-                appState.analyticsOpen = !appState.analyticsOpen;
-                const panel = document.getElementById('analytics-panel');
-                const btn = document.getElementById('btn-analytics');
-                if (appState.analyticsOpen) {
-                    panel.classList.remove('hidden');
-                    panel.classList.add('analytics-animate');
-                    btn.classList.add('bg-indigo-100', 'text-indigo-600');
-                    btn.classList.remove('text-slate-400');
-                    // Small delay to let DOM render canvases
-                    setTimeout(() => analytics.renderAll(), 50);
+            // ---- MODE SWITCH ----
+            setMode(mode) {
+                appState.mode = mode;
+                const focusPanel = document.getElementById('focus-mode-panel');
+                const normalContent = document.getElementById('normal-mode-content');
+                const nb = document.getElementById('mode-normal-btn');
+                const fb = document.getElementById('mode-focus-btn');
+
+                if(mode === 'focus') {
+                    focusPanel.classList.remove('hidden'); focusPanel.classList.add('flex');
+                    normalContent.classList.add('hidden');
+                    nb.classList.remove('active'); fb.classList.add('active');
+                    this.renderFocusMode();
                 } else {
-                    panel.classList.add('hidden');
-                    btn.classList.remove('bg-indigo-100', 'text-indigo-600');
-                    btn.classList.add('text-slate-400');
+                    focusPanel.classList.add('hidden'); focusPanel.classList.remove('flex');
+                    normalContent.classList.remove('hidden');
+                    fb.classList.remove('active'); nb.classList.add('active');
+                    this.renderTasks();
+                }
+                if(window.innerWidth<768) this.toggleSidebar();
+            },
+
+            // ---- FOCUS MODE ----
+            renderFocusMode() {
+                const active = appState.tasks.filter(t=>!t.completed).sort((a,b)=>(a.priority||3)-(b.priority||3));
+                const content = document.getElementById('focus-task-content');
+                const empty = document.getElementById('focus-empty');
+                const counter = document.getElementById('focus-task-counter');
+
+                if(!active.length) {
+                    content.classList.add('hidden'); empty.classList.remove('hidden');
+                    counter.innerText = '';
+                    return;
+                }
+                empty.classList.add('hidden'); content.classList.remove('hidden');
+                if(appState.focusIndex >= active.length) appState.focusIndex = 0;
+                const task = active[appState.focusIndex];
+                const cat = appState.categories.find(c=>c.id===task.categoryId)||{name:'כללי',color:'#6366f1'};
+
+                document.getElementById('focus-task-category').innerHTML=`<span style="color:${cat.color}">● ${cat.name}</span>`;
+                document.getElementById('focus-task-title').innerText = task.title;
+                counter.innerText = `משימה ${appState.focusIndex+1} מתוך ${active.length}`;
+
+                // Energy badge
+                const eb=document.getElementById('focus-energy-badge');
+                if(eb){if(task.energy){const em={1:'🔋 קל',2:'🔋🔋 בינוני',3:'🔋🔋🔋 ריכוז מלא'};eb.className=`energy-badge energy-${task.energy}`;eb.innerText=em[task.energy];eb.classList.remove('hidden');}else eb.classList.add('hidden');}
+
+                // Dopamine anchor
+                const dop = document.getElementById('focus-dopamine-display');
+                const dopText = document.getElementById('focus-dopamine-text');
+                if(task.dopamine) {
+                    dop.classList.remove('hidden');
+                    dopText.innerText = task.dopamine;
+                } else { dop.classList.add('hidden'); }
+
+                // Self-talk
+                const st=document.getElementById('focus-self-talk-display');
+                if(st){if(task.selfTalk){document.getElementById('focus-self-talk-text').innerText=task.selfTalk;st.classList.remove('hidden');}else st.classList.add('hidden');}
+
+                // Subtasks
+                const subContainer = document.getElementById('focus-subtasks');
+                const subs = task.subtasks || [];
+                if(subs.length) {
+                    subContainer.innerHTML = subs.map((s,i)=>`
+                        <div class="subtask-item flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl cursor-pointer ${s.done?'done-sub':''}" onclick="app.toggleSubtask('${task.id}',${i})">
+                            <div class="w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${s.done?'bg-green-500 border-green-500 text-white':'border-slate-300'}">
+                                ${s.done?'<i class="fa-solid fa-check text-[10px]"></i>':''}
+                            </div>
+                            <span class="text-sm font-medium dark:text-slate-200">${s.text}</span>
+                        </div>`).join('');
+                } else {
+                    subContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">אין תת-משימות. לחצי + חדש להוספה.</p>';
                 }
             },
 
-            setChartTab(tab) {
-                appState.currentChartTab = tab;
-                ['category', 'priority', 'progress'].forEach(t => {
-                    document.getElementById(`chart-view-${t}`).classList.toggle('hidden', t !== tab);
-                    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
-                });
-                // Re-render charts for the active tab
-                setTimeout(() => {
-                    if (tab === 'category') analytics.renderCategoryCharts();
-                    if (tab === 'priority') analytics.renderPriorityCharts();
-                    if (tab === 'progress') analytics.renderProgressCharts();
-                }, 30);
+            focusNextTask() {
+                const active = appState.tasks.filter(t=>!t.completed);
+                appState.focusIndex = (appState.focusIndex+1) % active.length;
+                this.renderFocusMode();
+            },
+            focusPrevTask() {
+                const active = appState.tasks.filter(t=>!t.completed);
+                appState.focusIndex = (appState.focusIndex-1+active.length) % active.length;
+                this.renderFocusMode();
+            },
+            async focusCompleteTask() {
+                const active = appState.tasks.filter(t=>!t.completed).sort((a,b)=>(a.priority||3)-(b.priority||3));
+                if(!active.length) return;
+                const task = active[appState.focusIndex];
+                await this.toggleComplete(task.id, false);
+                if(appState.focusIndex >= active.length-1) appState.focusIndex = 0;
             },
 
-            // ---- Tasks ----
-            async saveTask(e) {
-                if (e) e.preventDefault();
-                const btn = document.getElementById('btn-save-task');
-                btn.disabled = true; btn.innerText = "שומר...";
+            async toggleSubtask(taskId, index) {
+                const task = appState.tasks.find(t=>t.id===taskId);
+                if(!task) return;
+                const subs = [...(task.subtasks||[])];
+                subs[index] = {...subs[index], done: !subs[index].done};
+                await updateDoc(doc(db,`artifacts/${artifactId}/users/${appState.profile}/tasks`,taskId),{subtasks:subs});
+            },
+
+            // ---- POMODORO ----
+            startTimer(minutes) {
+                this.stopTimer();
+                appState.timerTotal = minutes * 60;
+                appState.timerSeconds = appState.timerTotal;
+                document.getElementById('timer-label').innerText = 'רץ...';
+                const ring = document.getElementById('timer-ring');
+                const circumference = 276.5;
+
+                appState.timerInterval = setInterval(()=>{
+                    appState.timerSeconds--;
+                    const display = document.getElementById('timer-display');
+                    const m = Math.floor(appState.timerSeconds/60).toString().padStart(2,'0');
+                    const s = (appState.timerSeconds%60).toString().padStart(2,'0');
+                    if(display) display.innerText=`${m}:${s}`;
+                    const progress = appState.timerSeconds/appState.timerTotal;
+                    if(ring) ring.style.strokeDashoffset = circumference*(1-progress);
+                    if(appState.timerSeconds<=0) {
+                        this.stopTimer();
+                        this.timerDone();
+                    }
+                }, 1000);
+            },
+
+            stopTimer() {
+                if(appState.timerInterval) { clearInterval(appState.timerInterval); appState.timerInterval=null; }
+                const display=document.getElementById('timer-display');
+                const label=document.getElementById('timer-label');
+                const ring=document.getElementById('timer-ring');
+                if(display) display.innerText='25:00';
+                if(label) label.innerText='עצור';
+                if(ring) ring.style.strokeDashoffset='0';
+                appState.timerSeconds=0; appState.timerTotal=0;
+            },
+
+            timerDone() {
+                document.getElementById('timer-label').innerText='הסתיים!';
+                confetti({particleCount:80,spread:60,origin:{y:0.5}});
+                Swal.fire({title:'⏰ הזמן הסתיים!',text:'כל הכבוד! רוצה לעשות עוד סיבוב?',icon:'success',confirmButtonText:'כן, עוד 25 דק׳',cancelButtonText:'לא עכשיו',showCancelButton:true}).then(r=>{if(r.isConfirmed) this.startTimer(25);});
+            },
+
+            // ---- TASKS ----
+            async saveTask() {
+                const btn=document.getElementById('btn-save-task');
+                btn.disabled=true; btn.innerText='שומר...';
                 try {
-                    const id = document.getElementById('task-id').value;
-                    const data = {
-                        title: document.getElementById('task-title').value.trim(),
-                        description: document.getElementById('task-desc').value.trim(),
-                        categoryId: document.getElementById('task-category').value,
-                        priority: parseInt(document.getElementById('task-priority').value),
-                        dueDate: document.getElementById('task-date').value,
-                        updatedAt: Date.now()
+                    const id=document.getElementById('task-id').value;
+                    const data={
+                        title:document.getElementById('task-title').value.trim(),
+                        description:document.getElementById('task-desc').value.trim(),
+                        categoryId:document.getElementById('task-category').value,
+                        priority:parseInt(document.getElementById('task-priority').value),
+                        dueDate:document.getElementById('task-date').value,
+                        dopamine:document.getElementById('task-dopamine').value.trim(),
+                        selfTalk:document.getElementById('task-self-talk').value.trim(),
+                        energy:appState.pendingEnergy||2,
+                        subtasks:appState.pendingSubtasks,
+                        updatedAt:Date.now()
                     };
-                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                    if (id) await updateDoc(doc(db, path, id), data);
-                    else await addDoc(collection(db, path), { ...data, completed: false, createdAt: Date.now(), order: appState.tasks.length });
+                    if(!data.title) { btn.disabled=false; btn.innerText='שמור'; return; }
+                    const path=`artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if(id) await updateDoc(doc(db,path,id),data);
+                    else await addDoc(collection(db,path),{...data,completed:false,createdAt:Date.now(),order:appState.tasks.length});
                     this.closeTaskModal();
-                } catch (err) { Swal.fire('שגיאה', 'שמירה נכשלה.', 'error'); }
-                finally { btn.disabled = false; btn.innerText = "שמור שינויים"; }
+                } catch(e){ Swal.fire('שגיאה','שמירה נכשלה.','error'); }
+                finally{ btn.disabled=false; btn.innerText='שמור'; }
+            },
+
+            addSubtask() {
+                const input=document.getElementById('subtask-input');
+                const text=input.value.trim();
+                if(!text) return;
+                appState.pendingSubtasks.push({text, done:false});
+                input.value='';
+                this.renderSubtaskList();
+            },
+
+            removeSubtask(index) {
+                appState.pendingSubtasks.splice(index,1);
+                this.renderSubtaskList();
+            },
+
+            renderSubtaskList() {
+                const container=document.getElementById('subtasks-list');
+                container.innerHTML=appState.pendingSubtasks.map((s,i)=>`
+                    <div class="subtask-list-item dark:bg-slate-600 dark:text-white">
+                        <span class="flex-1 text-sm">${s.text}</span>
+                        <button type="button" onclick="app.removeSubtask(${i})" class="text-red-400 hover:text-red-600 text-xs font-bold">✕</button>
+                    </div>`).join('');
             },
 
             renderTasks() {
-                const container = document.getElementById('tasks-container');
-                const search = document.getElementById('search-input').value.toLowerCase();
-                const dateFilter = document.getElementById('date-filter').value;
-                container.innerHTML = '';
-                const now = new Date().setHours(0,0,0,0);
+                const container=document.getElementById('tasks-container');
+                const search=document.getElementById('search-input').value.toLowerCase();
+                const dateFilter=document.getElementById('date-filter').value;
+                container.innerHTML='';
+                const now=new Date().setHours(0,0,0,0);
 
-                const filtered = appState.tasks.filter(t => {
-                    const matchSearch = t.title.toLowerCase().includes(search) || (t.description || '').toLowerCase().includes(search);
-                    const matchDate = !dateFilter || t.dueDate === dateFilter;
-                    if (appState.filter === 'active') return matchSearch && matchDate && !t.completed;
-                    if (appState.filter === 'completed') return matchSearch && matchDate && t.completed;
-                    if (appState.filter !== 'all') return matchSearch && matchDate && t.categoryId === appState.filter;
-                    return matchSearch && matchDate;
-                }).sort((a,b) => {
-                    // משימות פעילות תמיד לפני שהושלמו
-                    if (a.completed !== b.completed) return a.completed ? 1 : -1;
-                    // משימות שהושלמו: האחרונה שבוצעה ראשונה
-                    if (a.completed && b.completed) {
-                        const ca = a.completedAt || a.updatedAt || 0;
-                        const cb = b.completedAt || b.updatedAt || 0;
-                        return cb - ca;
-                    }
-                    // משימות פעילות: הכי חדשות ראשון
-                    return (b.createdAt || 0) - (a.createdAt || 0);
+                const filtered=appState.tasks.filter(t=>{
+                    const ms=t.title.toLowerCase().includes(search)||(t.description||'').toLowerCase().includes(search);
+                    const md=!dateFilter||t.dueDate===dateFilter;
+                    if(appState.filter==='active') return ms&&md&&!t.completed;
+                    if(appState.filter==='completed') return ms&&md&&t.completed;
+                    if(appState.filter!=='all') return ms&&md&&t.categoryId===appState.filter;
+                    return ms&&md;
+                }).sort((a,b)=>{
+                    if(a.completed!==b.completed) return a.completed?1:-1;
+                    if(a.completed&&b.completed) return (b.completedAt||0)-(a.completedAt||0);
+                    return (b.createdAt||0)-(a.createdAt||0);
                 });
 
-                document.getElementById('empty-state').classList.toggle('hidden', filtered.length > 0);
-                container.className = appState.viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-3 max-w-4xl mx-auto';
+                document.getElementById('empty-state').classList.toggle('hidden',filtered.length>0);
+                container.className=appState.viewMode==='grid'?'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5':'flex flex-col gap-3 max-w-4xl mx-auto';
 
-                filtered.forEach(task => {
-                    const cat = appState.categories.find(c => c.id === task.categoryId) || { name: 'כללי', color: '#ccc' };
-                    const isOverdue = task.dueDate && new Date(task.dueDate) < now && !task.completed;
-                    const p = task.priority || 3;
-                    const pConfig = {
-                        1: { text: 'דחוף מאוד', icon: 'fa-fire', class: 'text-red-700 bg-red-200 ring-1 ring-red-400' },
-                        2: { text: 'עדיפות גבוהה', icon: 'fa-arrow-up', class: 'text-orange-700 bg-orange-200' },
-                        3: { text: 'רגילה', icon: 'fa-minus', class: 'text-blue-700 bg-blue-200' }
-                    }[p];
+                filtered.forEach(task=>{
+                    const cat=appState.categories.find(c=>c.id===task.categoryId)||{name:'כללי',color:'#6366f1'};
+                    const isOverdue=task.dueDate&&new Date(task.dueDate)<now&&!task.completed;
+                    const p=task.priority||3;
+                    const pc={1:{text:'דחוף מאוד',icon:'fa-fire',cls:'text-red-700 bg-red-100'},2:{text:'גבוהה',icon:'fa-arrow-up',cls:'text-orange-700 bg-orange-100'},3:{text:'רגילה',icon:'fa-minus',cls:'text-indigo-700 bg-indigo-100'}}[p];
+                    const subs=task.subtasks||[];
+                    const doneSubs=subs.filter(s=>s.done).length;
+                    const dateStr=task.dueDate?new Date(task.dueDate).toLocaleDateString('he-IL',{day:'numeric',month:'short'}):'ללא יעד';
 
-                    const card = document.createElement('div');
-                    card.dataset.id = task.id;
-                    card.className = `task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed ? 'opacity-50 grayscale-[0.5]' : ''} ${isOverdue ? 'overdue-card' : ''}`;
-                    const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL', {day:'numeric', month:'short'}) : 'ללא יעד';
+                    const card=document.createElement('div');
+                    card.dataset.id=task.id;
+                    card.className=`task-card p-5 rounded-3xl shadow-sm border dark:border-slate-700 relative priority-${p} ${task.completed?'opacity-50':''} ${isOverdue?'overdue-card':''}`;
 
-                    card.innerHTML = `
+                    card.innerHTML=`
                         <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3">
-                                <div onclick="app.toggleComplete('${task.id}', ${task.completed})" class="w-6 h-6 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed ? 'bg-green-500 border-green-500 text-white shadow-glow' : 'border-slate-300 dark:border-slate-600'}">
-                                    ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                            <div class="flex items-center gap-2">
+                                <div onclick="app.toggleComplete('${task.id}',${task.completed})" class="w-7 h-7 border-2 rounded-xl cursor-pointer flex items-center justify-center transition-all ${task.completed?'bg-green-500 border-green-500 text-white':'border-slate-300 dark:border-slate-600 hover:border-indigo-400'}">
+                                    ${task.completed?'<i class="fa-solid fa-check text-xs"></i>':''}
                                 </div>
-                                <div class="grab-handle text-slate-400 dark:text-slate-500"><i class="fa-solid fa-grip-vertical"></i></div>
+                                <!-- Play / Pomodoro -->
+                                <button onclick="app.startTimerForTask('${task.id}')" id="play-${task.id}" class="play-btn w-7 h-7 rounded-xl flex items-center justify-center text-xs bg-indigo-50 text-indigo-500 hover:bg-indigo-100 dark:bg-indigo-900/30" title="התחל טיימר פומודורו">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <div class="grab-handle text-slate-300 dark:text-slate-600"><i class="fa-solid fa-grip-vertical text-xs"></i></div>
                             </div>
-                            <div class="flex gap-3 text-slate-300">
+                            <div class="flex gap-2 text-slate-300">
                                 <button onclick="app.openTaskModal('${task.id}')"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
                                 <button onclick="app.deleteTask('${task.id}')"><i class="fa-solid fa-trash-can text-sm"></i></button>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${cat.name}</span></div>
-                            <span class="text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm uppercase ${pConfig.class}">
-                                <i class="fa-solid ${pConfig.icon}"></i> ${pConfig.text}
-                            </span>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background:${cat.color}"></span><span class="text-[9px] font-bold text-slate-400 uppercase">${cat.name}</span></div>
+                            <span class="text-[9px] font-black px-2 py-1 rounded-full flex items-center gap-1 ${pc.cls}"><i class="fa-solid ${pc.icon}"></i>${pc.text}</span>
                         </div>
-                        <h4 class="font-bold text-lg dark:text-white leading-tight ${task.completed ? 'line-through text-slate-400' : ''}">${task.title}</h4>
-                        ${task.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-2 bg-white/40 dark:bg-black/10 p-2 rounded-xl border border-slate-100 dark:border-slate-700/50">${task.description}</p>` : ''}
-                        <p class="text-[11px] mt-4 flex items-center gap-1.5 font-bold ${isOverdue ? 'text-red-600' : 'text-indigo-500'}">
-                            <i class="fa-solid ${isOverdue ? 'fa-triangle-exclamation animate-pulse' : 'fa-calendar-check'}"></i> ${dateStr} ${isOverdue ? '(בפיגור!)' : ''}
+                        <h4 class="font-bold text-base dark:text-white leading-snug mb-2 ${task.completed?'line-through text-slate-400':''}">${task.title}</h4>
+                        ${task.description?`<p class="text-xs text-slate-500 dark:text-slate-400 mb-2 bg-white/50 dark:bg-black/10 p-2 rounded-xl">${task.description}</p>`:''}
+                        ${task.dopamine?`<div class="dopamine-anchor mb-2">🎯 ${task.dopamine}</div>`:''}
+                        ${subs.length?`<div class="mb-2"><span class="subtask-pill">${doneSubs}/${subs.length} צעדים</span></div>`:''}
+                        <p class="text-[11px] flex items-center gap-1.5 font-bold ${isOverdue?'text-red-500':'text-indigo-400'}">
+                            <i class="fa-solid ${isOverdue?'fa-triangle-exclamation animate-pulse':'fa-calendar-check'}"></i>${dateStr}${isOverdue?' (בפיגור!)':''}
                         </p>
-                        ${task.completed && task.completedAt ? `<p class="text-[10px] mt-1 flex items-center gap-1 text-green-600 font-bold"><i class="fa-solid fa-circle-check"></i> בוצע: ${new Date(task.completedAt).toLocaleDateString('he-IL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</p>` : ''}
+                        ${task.completed&&task.completedAt?`<p class="text-[10px] mt-1 flex items-center gap-1 text-green-500 font-bold"><i class="fa-solid fa-circle-check"></i> בוצע: ${new Date(task.completedAt).toLocaleDateString('he-IL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</p>`:''}
                     `;
                     container.appendChild(card);
                 });
                 this.initSortable();
             },
 
-            async performImport(data, shouldClear) {
-                Swal.fire({ title: 'מייבא...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                try {
-                    const path = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                    if (shouldClear) {
-                        const snap = await getDocs(collection(db, path));
-                        for (const d of snap.docs) await deleteDoc(d.ref);
-                    }
-                    const tasks = data.tasks || [];
-                    for (let i = 0; i < tasks.length; i += 500) {
-                        const batch = writeBatch(db);
-                        tasks.slice(i, i + 500).forEach((t, idx) => {
-                            const nt = {...t}; delete nt.id;
-                            batch.set(doc(collection(db, path)), { ...nt, order: idx });
-                        });
-                        await batch.commit();
-                    }
-                    Swal.fire('הצלחה!', `${tasks.length} משימות יובאו.`, 'success');
-                } catch(e) { Swal.fire('שגיאה', 'ייבוא נכשל.', 'error'); }
+            startTimerForTask(taskId) {
+                const btn = document.getElementById(`play-${taskId}`);
+                if(appState.activeTimerTaskId === taskId && appState.timerInterval) {
+                    this.stopTimer(); appState.activeTimerTaskId=null;
+                    if(btn){btn.classList.remove('running');btn.innerHTML='<i class="fa-solid fa-play"></i>';}
+                    return;
+                }
+                // Switch to focus mode and start
+                appState.activeTimerTaskId = taskId;
+                this.setMode('focus');
+                this.startTimer(25);
+                Swal.fire({title:'⏱️ טיימר התחיל!',text:'25 דקות. את יכולה לעשות את זה 💪',timer:2500,showConfirmButton:false,icon:'success'});
             },
 
             initSortable() {
-                const el = document.getElementById('tasks-container');
-                if (appState.sortableInstance) appState.sortableInstance.destroy();
-                appState.sortableInstance = new Sortable(el, {
-                    handle: '.grab-handle', animation: 200, ghostClass: 'sortable-ghost',
-                    onEnd: async () => {
-                        const items = Array.from(el.children);
-                        const batch = writeBatch(db);
-                        items.forEach((item, index) => {
-                            const ref = doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, item.dataset.id);
-                            batch.update(ref, { order: index });
-                        });
-                        await batch.commit();
-                    }
-                });
+                const el=document.getElementById('tasks-container');
+                if(appState.sortableInstance) appState.sortableInstance.destroy();
+                appState.sortableInstance=new Sortable(el,{handle:'.grab-handle',animation:200,ghostClass:'sortable-ghost',onEnd:async()=>{
+                    const items=Array.from(el.children);
+                    const batch=writeBatch(db);
+                    items.forEach((item,idx)=>{
+                        const ref=doc(db,`artifacts/${artifactId}/users/${appState.profile}/tasks`,item.dataset.id);
+                        batch.update(ref,{order:idx});
+                    });
+                    await batch.commit();
+                }});
             },
 
             async toggleComplete(id, current) {
-                if (!current) { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); this.updateStreak(); }
-                const updateData = { completed: !current };
-                if (!current) updateData.completedAt = Date.now();
-                else updateData.completedAt = null;
-                await updateDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id), updateData);
+                const task=appState.tasks.find(t=>t.id===id);
+                if(!current) {
+                    confetti({particleCount:120,spread:80,origin:{y:0.6}});
+                    setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},colors:['#6366f1','#10b981','#f59e0b']}),300);
+                    await this.updateStreak();
+                    this.showCompletionOverlay(task);
+                }
+                const upd={completed:!current};
+                if(!current) upd.completedAt=Date.now(); else upd.completedAt=null;
+                await updateDoc(doc(db,`artifacts/${artifactId}/users/${appState.profile}/tasks`,id),upd);
+                if(appState.mode==='focus') setTimeout(()=>this.renderFocusMode(),300);
             },
 
+            // ---- FORGIVING STREAK ----
             async updateStreak() {
-                const streakRef = doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity');
-                const snap = await getDoc(streakRef);
-                const now = new Date().setHours(0,0,0,0);
-                let streak = 1;
-                if (snap.exists()) {
-                    const last = snap.data().lastCompletionDate;
-                    if (last === now) return;
-                    if (last === now - 86400000) streak = (snap.data().streak || 0) + 1;
+                const ref=doc(db,`artifacts/${artifactId}/users/${appState.profile}/settings`,'productivity');
+                const snap=await getDoc(ref);
+                const now=new Date().setHours(0,0,0,0);
+                let streak=1, shields=2;
+                if(snap.exists()) {
+                    const d=snap.data();
+                    shields=d.shields!=null?d.shields:2;
+                    if(d.lastCompletionDate===now) return;
+                    const diff=now-d.lastCompletionDate;
+                    if(diff===86400000) {
+                        // consecutive day
+                        streak=(d.streak||0)+1;
+                    } else if(diff===172800000 && shields>0) {
+                        // missed 1 day — use a shield
+                        streak=(d.streak||0)+1;
+                        shields=Math.max(0,shields-1);
+                        Swal.fire({title:'🛡️ המגן הגן עליך!',text:`דילגת יום אחד — המגן שמר על הרצף שלך! נשארו ${shields} מגנים.`,icon:'info',timer:3000,showConfirmButton:false});
+                    } else {
+                        streak=1;
+                        // restore shields over time
+                        const daysSinceLast=Math.floor(diff/86400000);
+                        shields=Math.min(2,shields+Math.floor(daysSinceLast/7));
+                    }
                 }
-                await setDoc(streakRef, { streak, lastCompletionDate: now }, { merge: true });
-                appState.stats.streak = streak;
-                document.getElementById('streak-counter').innerText = `🔥 ${streak} ימים`;
+                await setDoc(ref,{streak,shields,lastCompletionDate:now},{merge:true});
+                appState.stats.streak=streak; appState.stats.shields=shields;
+                document.getElementById('streak-counter').innerText=`🔥 ${streak} ימים`;
+                const shieldEl=document.getElementById('shield-counter');
+                if(shields>0){ shieldEl.classList.remove('hidden'); shieldEl.innerText=`🛡️ ${shields} מגנים`; }
+                else shieldEl.classList.add('hidden');
             },
 
             async loadStreak() {
-                const snap = await getDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/settings`, 'productivity'));
-                if (snap.exists()) {
-                    appState.stats.streak = snap.data().streak || 0;
-                    document.getElementById('streak-counter').innerText = `🔥 ${appState.stats.streak} ימים`;
+                const snap=await getDoc(doc(db,`artifacts/${artifactId}/users/${appState.profile}/settings`,'productivity'));
+                if(snap.exists()) {
+                    appState.stats.streak=snap.data().streak||0;
+                    appState.stats.shields=snap.data().shields!=null?snap.data().shields:2;
+                    document.getElementById('streak-counter').innerText=`🔥 ${appState.stats.streak} ימים`;
+                    const shEl=document.getElementById('shield-counter');
+                    if(appState.stats.shields>0){shEl.classList.remove('hidden');shEl.innerText=`🛡️ ${appState.stats.shields} מגנים`;}
                 }
             },
 
+            // ---- WEEKLY SUMMARY ----
             openWeeklySummary() {
-                const weekAgo = Date.now() - (7 * 86400000);
-                const weekly = appState.tasks.filter(t => t.completed && (t.updatedAt || Date.now()) > weekAgo);
-                document.getElementById('weekly-count').innerText = weekly.length;
-                document.getElementById('weekly-streak').innerText = appState.stats.streak;
-                const sug = appState.tasks.filter(t => !t.completed).sort((a,b) => (a.dueDate || '9999') > (b.dueDate || '9999') ? 1 : -1).slice(0, 3);
-                document.getElementById('today-suggestions').innerHTML = sug.map(t => `<div class="bg-indigo-50 dark:bg-slate-700/50 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-orange-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span></div>`).join('') || '<p class="text-xs text-slate-400">הכל נקי!</p>';
+                const wa=Date.now()-(7*86400000);
+                const wk=appState.tasks.filter(t=>t.completed&&(t.updatedAt||0)>wa);
+                document.getElementById('weekly-count').innerText=wk.length;
+                document.getElementById('weekly-streak').innerText=appState.stats.streak;
+                document.getElementById('weekly-shields').innerText=appState.stats.shields||0;
+                const sug=appState.tasks.filter(t=>!t.completed).sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1).slice(0,3);
+                document.getElementById('today-suggestions').innerHTML=sug.map(t=>`<div class="bg-indigo-50 dark:bg-slate-700 p-3 rounded-xl flex items-center gap-3 text-right"><i class="fa-solid fa-star text-amber-400 text-xs"></i><span class="text-xs font-bold dark:text-white">${t.title}</span>${t.dopamine?`<span class="dopamine-anchor text-[10px]">🎯 ${t.dopamine}</span>`:''}</div>`).join('')||'<p class="text-xs text-slate-400 text-center">הכל נקי! 🎉</p>';
                 document.getElementById('weekly-modal').classList.remove('hidden');
             },
+            closeWeeklySummary(){ document.getElementById('weekly-modal').classList.add('hidden'); },
 
-            async runOnboarding() {
-                const batch = writeBatch(db);
-                const base = `artifacts/${artifactId}/users/${appState.profile}/tasks`;
-                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                [{ title: "ברוכים הבאים!", description: "סמנו אותי כבוצע לקונפטי!", priority: 3, completed: false, createdAt: Date.now(), order: 0 },
-                 { title: "משימה בפיגור", description: "תאריך שעבר נראה באדום.", priority: 1, dueDate: yesterday, completed: false, createdAt: Date.now(), order: 1 }]
-                .forEach(s => batch.set(doc(collection(db, base)), s));
-                await batch.commit();
+            // ---- TASK MODAL ----
+            openTaskModal(tid=null) {
+                appState.pendingSubtasks=[];
+                appState.pendingEnergy=2;
+                appState.aiResultText='';
+                document.getElementById('subtasks-list').innerHTML='';
+                document.getElementById('ai-result-area').classList.add('hidden');
+                document.getElementById('task-modal').classList.remove('hidden');
+                document.getElementById('modal-title').innerText=tid?'עריכת משימה':'משימה חדשה';
+                this.setEnergy(2);
+                if(tid) {
+                    const t=appState.tasks.find(x=>x.id===tid);
+                    document.getElementById('task-id').value=t.id;
+                    document.getElementById('task-title').value=t.title||'';
+                    document.getElementById('task-desc').value=t.description||'';
+                    document.getElementById('task-priority').value=t.priority||3;
+                    document.getElementById('task-category').value=t.categoryId||'';
+                    document.getElementById('task-date').value=t.dueDate||'';
+                    document.getElementById('task-dopamine').value=t.dopamine||'';
+                    document.getElementById('task-self-talk').value=t.selfTalk||'';
+                    appState.pendingSubtasks=[...(t.subtasks||[])];
+                    appState.pendingEnergy=t.energy||2;
+                    this.setEnergy(t.energy||2);
+                    this.renderSubtaskList();
+                } else {
+                    document.getElementById('task-id').value='';
+                    document.getElementById('task-title').value='';
+                    document.getElementById('task-desc').value='';
+                    document.getElementById('task-priority').value=3;
+                    document.getElementById('task-date').value='';
+                    document.getElementById('task-dopamine').value='';
+                    document.getElementById('task-self-talk').value='';
+                }
+            },
+            closeTaskModal(){ document.getElementById('task-modal').classList.add('hidden'); },
+
+            // ---- ENERGY ----
+            setEnergy(level){
+                appState.pendingEnergy=level;
+                [1,2,3].forEach(l=>{
+                    const b=document.getElementById(`energy-${l}`);
+                    if(!b)return;
+                    const ac=l===1?'border-green-500':l===2?'border-yellow-500':'border-red-500';
+                    ['border-green-500','border-yellow-500','border-red-500'].forEach(c=>b.classList.remove(c));
+                    if(l===level)b.classList.add(ac);
+                    b.style.opacity=l===level?'1':'0.6';
+                });
             },
 
-            async seedInitialCategories() {
-                const batch = writeBatch(db);
-                [{ name: 'כללי', color: '#6366f1' }, { name: 'בית', color: '#10b981' }].forEach(c => batch.set(doc(collection(db, `artifacts/${artifactId}/users/${appState.profile}/categories`)), c));
-                await batch.commit();
+            // ---- AI REWRITE ----
+            async aiRewriteTask(){
+                const title=document.getElementById('task-title').value.trim();
+                if(!title){Swal.fire({title:'⚠️ כתבי קודם מה המשימה',timer:2000,showConfirmButton:false,icon:'warning'});return;}
+                const btn=document.getElementById('ai-rewrite-btn');
+                btn.disabled=true;
+                const area=document.getElementById('ai-result-area'),loading=document.getElementById('ai-loading'),resultBox=document.getElementById('ai-result-box');
+                area.classList.remove('hidden');loading.classList.remove('hidden');resultBox.classList.add('hidden');
+                try{
+                    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+                        method:'POST',headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:250,
+                            system:`אתה מומחה ADHD. המשתמשת סובלת מקושי התנעה. תפקידך: לזהות את הפעולה הפיזית הראשונה הכי קטנה שאפשרית עכשיו. הצעד חייב: ספציפי לחלוטין, ניתן לביצוע תוך 1-3 דקות, פועל פשוט (לפתוח/ללחוץ/לכתוב/לקחת). החזר רק את הצעד בעברית, 1-2 משפטים ללא הסברים.`,
+                            messages:[{role:'user',content:`המשימה: "${title}"\n\nמה הצעד הפיזי הראשון הכי קטן שהיא יכולה לעשות עכשיו?`}]})
+                    });
+                    const data=await resp.json();
+                    const text=data.content?.[0]?.text||'לא הצלחתי לייצר תוצאה.';
+                    appState.aiResultText=text;
+                    document.getElementById('ai-result-text').innerText=text;
+                    loading.classList.add('hidden');resultBox.classList.remove('hidden');
+                }catch(e){
+                    loading.classList.add('hidden');resultBox.classList.remove('hidden');
+                    document.getElementById('ai-result-text').innerText='שגיאה בחיבור. בדקי אינטרנט.';
+                }finally{btn.disabled=false;}
+            },
+            applyAiResult(){
+                if(appState.aiResultText){
+                    document.getElementById('task-title').value=appState.aiResultText;
+                    document.getElementById('ai-result-area').classList.add('hidden');
+                    Swal.fire({title:'✓ הוחל!',timer:1500,showConfirmButton:false,icon:'success'});
+                }
             },
 
-            closeWeeklySummary() { document.getElementById('weekly-modal').classList.add('hidden'); },
-
-            async deleteTask(id) {
-                const res = await Swal.fire({ title: 'למחוק?', icon: 'warning', showCancelButton: true });
-                if (res.isConfirmed) await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/tasks`, id));
+            // ---- EMOTION CHECK-IN ----
+            showEmotionCheckin(){document.getElementById('emotion-checkin').classList.add('active');},
+            selectEmotion(emotion,btn){
+                document.querySelectorAll('.emotion-btn').forEach(b=>b.classList.remove('selected'));
+                btn.classList.add('selected');
+                appState.emotionFilter=emotion;
+                setTimeout(()=>{
+                    document.getElementById('emotion-checkin').classList.remove('active');
+                    if(emotion!=='skip'){
+                        this.setMode('focus');
+                        const msgs={tired:'בחרתי לך משימה קלה 🌸 רק 5 דקות.',overwhelmed:'הנה משימה אחת קטנה. רק אחת 💙',anxious:'צעד אחד. הכל מתחיל משם 🌱',ok:'יאללה, בואי נעשה! 😊',ready:'⚡ את מוכנה — יש לך משימה חזקה!'};
+                        if(msgs[emotion])Swal.fire({title:msgs[emotion],timer:2500,showConfirmButton:false,background:document.documentElement.classList.contains('dark')?'#1e293b':'#fff'});
+                        this.chooseForMe();
+                    }
+                },600);
             },
 
+            // ---- CHOOSE FOR ME ----
+            chooseForMe(){
+                const btn=document.getElementById('choose-for-me-btn');
+                if(btn){btn.classList.add('choose-shake');setTimeout(()=>btn.classList.remove('choose-shake'),500);}
+                let cands=appState.tasks.filter(t=>!t.completed);
+                if(!cands.length){Swal.fire({title:'🎉 הכל בוצע!',text:'הוסיפי משימה חדשה.',icon:'success',timer:3000,showConfirmButton:false});return;}
+                const em=appState.emotionFilter;
+                if(em==='tired'||em==='overwhelmed'){const e=cands.filter(t=>(t.energy||2)===1);if(e.length)cands=e;}
+                else if(em==='ready'){const e=cands.filter(t=>(t.energy||2)===3);if(e.length)cands=e;}
+                const w=[];cands.forEach(t=>{const wt=t.priority===1?5:t.priority===2?3:1;for(let i=0;i<wt;i++)w.push(t);});
+                const chosen=w[Math.floor(Math.random()*w.length)];
+                const active=appState.tasks.filter(t=>!t.completed);
+                const idx=active.findIndex(t=>t.id===chosen.id);
+                if(idx>=0)appState.focusIndex=idx;
+                this.renderFocusMode();
+                Swal.fire({title:`🎲 נבחרה: "${chosen.title}"`,text:'הנה המשימה שלך. רק צעד אחד 💪',timer:2500,showConfirmButton:false,background:document.documentElement.classList.contains('dark')?'#1e293b':'#fff'});
+            },
+
+            // ---- FLOW MODE ----
+            enterFlowMode(){
+                const active=appState.tasks.filter(t=>!t.completed).sort((a,b)=>(a.priority||3)-(b.priority||3));
+                if(!active.length)return;
+                const task=active[appState.focusIndex]||active[0];
+                appState.flowTaskId=task.id;
+                const firstSub=task.subtasks&&task.subtasks.find(s=>!s.done);
+                document.getElementById('flow-task-name').innerText=task.title;
+                document.getElementById('flow-step-name').innerText=firstSub?`👉 ${firstSub.text}`:'התחילי עכשיו ✨';
+                const dop=document.getElementById('flow-dop');
+                if(task.dopamine){document.getElementById('flow-dop-text').innerText=task.dopamine;dop.classList.remove('hidden');}
+                else dop.classList.add('hidden');
+                document.getElementById('flow-mode').classList.add('active');
+                this.startFlowTimer(25);
+            },
+            exitFlowMode(){document.getElementById('flow-mode').classList.remove('active');this.stopFlowTimer();},
+            async flowCompleteTask(){if(appState.flowTaskId)await this.toggleComplete(appState.flowTaskId,false);this.exitFlowMode();},
+            flowAddTime(m){appState.flowTimerSeconds+=m*60;if(!appState.flowTimerTotal)appState.flowTimerTotal=m*60;else appState.flowTimerTotal+=m*60;},
+            startFlowTimer(minutes){
+                this.stopFlowTimer();
+                appState.flowTimerTotal=minutes*60;appState.flowTimerSeconds=appState.flowTimerTotal;
+                const circ=276.5;
+                appState.flowTimerInterval=setInterval(()=>{
+                    appState.flowTimerSeconds--;
+                    const m=Math.floor(appState.flowTimerSeconds/60).toString().padStart(2,'0');
+                    const s=(appState.flowTimerSeconds%60).toString().padStart(2,'0');
+                    const el=document.getElementById('flow-timer-display');if(el)el.innerText=`${m}:${s}`;
+                    const ring=document.getElementById('flow-ring');
+                    if(ring&&appState.flowTimerTotal>0)ring.style.strokeDashoffset=circ*(1-(appState.flowTimerSeconds/appState.flowTimerTotal));
+                    if(appState.flowTimerSeconds<=0){this.stopFlowTimer();confetti({particleCount:100,spread:70,origin:{y:0.5}});}
+                },1000);
+            },
+            stopFlowTimer(){
+                if(appState.flowTimerInterval){clearInterval(appState.flowTimerInterval);appState.flowTimerInterval=null;}
+                appState.flowTimerSeconds=0;appState.flowTimerTotal=0;
+                const el=document.getElementById('flow-timer-display');if(el)el.innerText='25:00';
+                const ring=document.getElementById('flow-ring');if(ring)ring.style.strokeDashoffset='0';
+            },
+
+            // ---- COMPLETION OVERLAY ----
+            showCompletionOverlay(task){
+                const ems=['🎉','🏆','⭐','💪','🌟','🎯','✨','🚀'];
+                document.getElementById('completion-emoji').innerText=ems[Math.floor(Math.random()*ems.length)];
+                document.getElementById('completion-title').innerText=`"${task?.title||'המשימה'}" — בוצע!`;
+                document.getElementById('completion-self-talk-text').innerText=task?.selfTalk?`"${task.selfTalk}"`:'';
+                document.getElementById('completion-overlay').classList.add('active');
+                setTimeout(()=>this.closeCompletionOverlay(),5000);
+            },
+            closeCompletionOverlay(){document.getElementById('completion-overlay').classList.remove('active');},
+
+            // ---- CATEGORIES ----
             renderSidebarCategories() {
-                const container = document.getElementById('sidebar-categories');
-                container.innerHTML = '';
-                appState.categories.forEach(cat => {
-                    const btn = document.createElement('div');
-                    btn.className = `group flex items-center justify-between px-4 py-2.5 text-sm rounded-xl cursor-pointer ${appState.filter === cat.id ? 'active-nav shadow-md' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`;
-                    btn.onclick = () => { appState.filter = cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth < 768) this.toggleSidebar(); };
-                    btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation(); app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
+                const container=document.getElementById('sidebar-categories');
+                container.innerHTML='';
+                appState.categories.forEach(cat=>{
+                    const btn=document.createElement('div');
+                    btn.className=`group flex items-center justify-between px-4 py-2.5 text-sm rounded-xl cursor-pointer ${appState.filter===cat.id?'active-nav shadow':'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`;
+                    btn.onclick=()=>{ appState.filter=cat.id; this.renderTasks(); this.renderSidebarCategories(); if(window.innerWidth<768) this.toggleSidebar(); };
+                    btn.innerHTML=`<div class="flex items-center gap-3"><span class="w-2.5 h-2.5 rounded-full" style="background:${cat.color}"></span><span>${cat.name}</span></div><i onclick="event.stopPropagation();app.openCategoryModal('${cat.id}')" class="fa-solid fa-pen text-[10px] opacity-0 group-hover:opacity-100 transition-all"></i>`;
                     container.appendChild(btn);
                 });
-                document.getElementById('task-category').innerHTML = appState.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                document.getElementById('task-category').innerHTML=appState.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
             },
 
+            openCategoryModal(cid=null) {
+                document.getElementById('category-modal').classList.remove('hidden');
+                if(cid) {
+                    const c=appState.categories.find(x=>x.id===cid);
+                    document.getElementById('edit-cat-id').value=c.id;
+                    document.getElementById('cat-name-input').value=c.name;
+                    document.getElementById('cat-color-picker').value=c.color;
+                    document.getElementById('btn-delete-cat').classList.remove('hidden');
+                } else {
+                    document.getElementById('cat-name-input').value='';
+                    document.getElementById('edit-cat-id').value='';
+                    document.getElementById('cat-color-picker').value='#6366f1';
+                    document.getElementById('btn-delete-cat').classList.add('hidden');
+                }
+            },
+            closeCategoryModal(){ document.getElementById('category-modal').classList.add('hidden'); },
+
             async saveCategory() {
-                const id = document.getElementById('edit-cat-id').value, name = document.getElementById('cat-name-input').value.trim(), color = document.getElementById('cat-color-picker').value;
-                if (!name) return;
-                const path = `artifacts/${artifactId}/users/${appState.profile}/categories`;
-                if (id) await updateDoc(doc(db, path, id), { name, color });
-                else await addDoc(collection(db, path), { name, color });
+                const id=document.getElementById('edit-cat-id').value,name=document.getElementById('cat-name-input').value.trim(),color=document.getElementById('cat-color-picker').value;
+                if(!name) return;
+                const path=`artifacts/${artifactId}/users/${appState.profile}/categories`;
+                if(id) await updateDoc(doc(db,path,id),{name,color});
+                else await addDoc(collection(db,path),{name,color});
                 this.closeCategoryModal();
             },
 
             async deleteCategory() {
-                const id = document.getElementById('edit-cat-id').value;
-                const res = await Swal.fire({ title: 'מחיקה?', text: 'הקטגוריה תימחק!', icon: 'warning', showCancelButton: true });
-                if (res.isConfirmed) { await deleteDoc(doc(db, `artifacts/${artifactId}/users/${appState.profile}/categories`, id)); this.closeCategoryModal(); }
+                const id=document.getElementById('edit-cat-id').value;
+                const r=await Swal.fire({title:'מחיקה?',text:'הקטגוריה תימחק!',icon:'warning',showCancelButton:true});
+                if(r.isConfirmed){ await deleteDoc(doc(db,`artifacts/${artifactId}/users/${appState.profile}/categories`,id)); this.closeCategoryModal(); }
             },
 
-            setViewMode(mode) {
-                appState.viewMode = mode;
-                document.getElementById('btn-grid').className = mode === 'grid' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
-                document.getElementById('btn-list').className = mode === 'list' ? 'w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-white text-indigo-600 shadow-sm' : 'w-9 h-9 rounded-lg flex items-center justify-center transition-all text-slate-400';
-                this.renderTasks();
+            async deleteTask(id) {
+                const r=await Swal.fire({title:'למחוק?',icon:'warning',showCancelButton:true});
+                if(r.isConfirmed) await deleteDoc(doc(db,`artifacts/${artifactId}/users/${appState.profile}/tasks`,id));
             },
 
-            openTaskModal(tid = null) {
-                document.getElementById('task-modal').classList.remove('hidden');
-                if (tid) {
-                    const t = appState.tasks.find(x => x.id === tid);
-                    document.getElementById('task-id').value = t.id;
-                    document.getElementById('task-title').value = t.title;
-                    document.getElementById('task-desc').value = t.description;
-                    document.getElementById('task-priority').value = t.priority;
-                    document.getElementById('task-category').value = t.categoryId;
-                    document.getElementById('task-date').value = t.dueDate || '';
-                } else { document.getElementById('task-form').reset(); document.getElementById('task-id').value = ''; }
-            },
-            closeTaskModal() { document.getElementById('task-modal').classList.add('hidden'); },
-
-            openCategoryModal(cid = null) {
-                document.getElementById('category-modal').classList.remove('hidden');
-                if (cid) {
-                    const c = appState.categories.find(x => x.id === cid);
-                    document.getElementById('edit-cat-id').value = c.id;
-                    document.getElementById('cat-name-input').value = c.name;
-                    document.getElementById('cat-color-picker').value = c.color;
-                    document.getElementById('btn-delete-cat').classList.remove('hidden');
+            // ---- ANALYTICS ----
+            toggleAnalytics() {
+                appState.analyticsOpen=!appState.analyticsOpen;
+                const panel=document.getElementById('analytics-panel');
+                const btn=document.getElementById('btn-analytics');
+                if(appState.analyticsOpen){
+                    panel.classList.remove('hidden'); panel.classList.add('analytics-animate');
+                    btn.classList.add('bg-indigo-100','text-indigo-600'); btn.classList.remove('text-slate-400');
+                    setTimeout(()=>analytics.renderAll(),50);
                 } else {
-                    document.getElementById('cat-name-input').value = '';
-                    document.getElementById('edit-cat-id').value = '';
-                    document.getElementById('cat-color-picker').value = '#6366f1';
-                    document.getElementById('btn-delete-cat').classList.add('hidden');
+                    panel.classList.add('hidden');
+                    btn.classList.remove('bg-indigo-100','text-indigo-600'); btn.classList.add('text-slate-400');
                 }
             },
-            closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); },
 
-            setFilter(f) { appState.filter = f; this.renderTasks(); this.renderSidebarCategories(); },
-            toggleTheme() { document.documentElement.classList.toggle('dark'); if(appState.analyticsOpen) setTimeout(() => analytics.renderAll(), 100); },
-            toggleSidebar() { document.getElementById('sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); },
-
-            renderStats() {
-                const t = appState.tasks.length, c = appState.tasks.filter(x => x.completed).length;
-                document.getElementById('stat-total').innerText = t;
-                document.getElementById('stat-active').innerText = t - c;
-                document.getElementById('stat-completed').innerText = c;
+            setChartTab(tab) {
+                appState.currentChartTab=tab;
+                ['category','priority','progress'].forEach(t=>{
+                    document.getElementById(`chart-view-${t}`).classList.toggle('hidden',t!==tab);
+                    document.getElementById(`tab-${t}`).classList.toggle('active',t===tab);
+                });
+                setTimeout(()=>{
+                    if(tab==='category') analytics.renderCategoryCharts();
+                    if(tab==='priority') analytics.renderPriorityCharts();
+                    if(tab==='progress') analytics.renderProgressCharts();
+                },30);
             },
 
-            exportTasks() {
-                const b = new Blob([JSON.stringify({ tasks: appState.tasks, categories: appState.categories })], { type: 'application/json' });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup.json`; a.click();
+            // ---- MISC ----
+            setFilter(f){ appState.filter=f; this.renderTasks(); this.renderSidebarCategories(); },
+            setViewMode(mode){
+                appState.viewMode=mode;
+                document.getElementById('btn-grid').className=mode==='grid'?'w-9 h-9 rounded-lg flex items-center justify-center bg-white text-indigo-600 shadow-sm':'w-9 h-9 rounded-lg flex items-center justify-center text-slate-400';
+                document.getElementById('btn-list').className=mode==='list'?'w-9 h-9 rounded-lg flex items-center justify-center bg-white text-indigo-600 shadow-sm':'w-9 h-9 rounded-lg flex items-center justify-center text-slate-400';
+                this.renderTasks();
             },
-            logout() { localStorage.removeItem('tm_last_profile'); location.reload(); }
+            toggleTheme(){ document.documentElement.classList.toggle('dark'); if(appState.analyticsOpen) setTimeout(()=>analytics.renderAll(),100); },
+            toggleSidebar(){ document.getElementById('sidebar').classList.toggle('translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); },
+            renderStats(){
+                const t=appState.tasks.length,c=appState.tasks.filter(x=>x.completed).length;
+                document.getElementById('stat-total').innerText=t;
+                document.getElementById('stat-active').innerText=t-c;
+                document.getElementById('stat-completed').innerText=c;
+            },
+            exportTasks(){
+                const b=new Blob([JSON.stringify({tasks:appState.tasks,categories:appState.categories})],{type:'application/json'});
+                const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click();
+            },
+            async performImport(data, shouldClear){
+                Swal.fire({title:'מייבא...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+                try {
+                    const path=`artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                    if(shouldClear){ const snap=await getDocs(collection(db,path)); for(const d of snap.docs) await deleteDoc(d.ref); }
+                    const tasks=data.tasks||[];
+                    for(let i=0;i<tasks.length;i+=500){
+                        const batch=writeBatch(db);
+                        tasks.slice(i,i+500).forEach((t,idx)=>{ const nt={...t}; delete nt.id; batch.set(doc(collection(db,path)),{...nt,order:idx}); });
+                        await batch.commit();
+                    }
+                    Swal.fire('הצלחה!',`${tasks.length} משימות יובאו.`,'success');
+                } catch(e){ Swal.fire('שגיאה','ייבוא נכשל.','error'); }
+            },
+            async seedInitialCategories(){
+                const batch=writeBatch(db);
+                [{name:'כללי',color:'#6366f1'},{name:'בית',color:'#10b981'}].forEach(c=>batch.set(doc(collection(db,`artifacts/${artifactId}/users/${appState.profile}/categories`)),c));
+                await batch.commit();
+            },
+            async runOnboarding(){
+                const batch=writeBatch(db);
+                const base=`artifacts/${artifactId}/users/${appState.profile}/tasks`;
+                const yesterday=new Date(Date.now()-86400000).toISOString().split('T')[0];
+                [
+                    {title:"ברוכים הבאים! לחצו ✓ לחגיגת קונפטי 🎉",priority:3,completed:false,createdAt:Date.now(),order:0,subtasks:[{text:"לחץ על ✓",done:false}],dopamine:""},
+                    {title:"משימה בפיגור — תאריך שעבר",priority:1,dueDate:yesterday,completed:false,createdAt:Date.now(),order:1,subtasks:[],dopamine:""}
+                ].forEach(s=>batch.set(doc(collection(db,base)),s));
+                await batch.commit();
+            },
+            logout(){ localStorage.removeItem('tm_last_profile'); location.reload(); }
         };
 
-        window.app = app;
-        const saved = localStorage.getItem('tm_last_profile');
-        if (saved) app.loginAs(saved);
+        window.app=app;
+        const saved=localStorage.getItem('tm_last_profile');
+        if(saved) app.loginAs(saved);
 
-        document.getElementById('json-file-input').onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = async (ev) => {
-                const data = JSON.parse(ev.target.result);
-                const res = await Swal.fire({ title: 'ייבוא גיבוי', text: 'למזג או להחליף?', showCancelButton: true });
-                app.performImport(data, res.isConfirmed);
+        document.getElementById('json-file-input').onchange=(e)=>{
+            const reader=new FileReader();
+            reader.onload=async(ev)=>{
+                const data=JSON.parse(ev.target.result);
+                const res=await Swal.fire({title:'ייבוא גיבוי',text:'למזג או להחליף?',showCancelButton:true});
+                app.performImport(data,res.isConfirmed);
             };
             reader.readAsText(e.target.files[0]);
         };
